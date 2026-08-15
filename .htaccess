@@ -1,0 +1,40 @@
+# =========================================================
+# CONFIGURAÇÃO APACHE / CPANEL HOSTGATOR - HOT CHILI
+# =========================================================
+
+# 1. FORÇAR HTTPS / SSL SEGURO
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# 2. CABEÇALHOS DE SEGURANÇA E CORS PARA APIS
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# 3. COMPRESSÃO GZIP (DESEMPENHO E VELOCIDADE MÁXIMA)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# 4. CACHE DE NAVEGADOR (LEVEZA E CARREGAMENTO INSTANTÂNEO)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/json "access plus 0 seconds"
+</IfModule>
+
+# 5. PÁGINA INICIAL PADRÃO
+DirectoryIndex index.html index.php

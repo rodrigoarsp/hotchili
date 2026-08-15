@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0" name="viewport"/>
+    <title>Atendimento &amp; Concierge VIP | Hot Chili Luxury Beachwear</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..800&amp;family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS & Global Stylesheet -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="js/config/tailwind-theme.js"></script>
+    <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body data-page-id="atendimento" class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+    <div id="header-root"></div>
+
+    <main class="pt-20 sm:pt-24 lg:pt-28 pb-16 px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto">
+        <!-- Hero Header (Renderizado dinamicamente via Hero.js & CarePage.js) -->
+        <div id="hero-root"></div>
+
+        <!-- 3 Contact Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
+            <!-- Card 1 -->
+            <div class="bg-surface-container-low p-6 sm:p-8 rounded-sm border border-outline-variant/30 text-center space-y-3.5 shadow-xs hover:shadow-sm transition-shadow">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
+                    <span class="material-symbols-outlined text-2xl">chat</span>
+                </div>
+                <h3 class="font-display-lg text-lg sm:text-xl text-on-surface font-bold">Concierge WhatsApp VIP</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                    Consultoria de estilo, dúvidas sobre medidas e pedidos sob medida com resposta ágil.
+                </p>
+                <a href="https://wa.me/5511999999999" target="_blank" class="w-full sm:w-auto inline-block py-3 px-6 bg-primary text-on-primary font-label-sm text-xs uppercase tracking-wider font-bold rounded-sm hover:bg-primary-container transition-colors shadow-xs active:scale-95">
+                    Iniciar Atendimento
+                </a>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-surface-container-low p-6 sm:p-8 rounded-sm border border-outline-variant/30 text-center space-y-3.5 shadow-xs hover:shadow-sm transition-shadow">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
+                    <span class="material-symbols-outlined text-2xl">mail</span>
+                </div>
+                <h3 class="font-display-lg text-lg sm:text-xl text-on-surface font-bold">E-mail de Suporte</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                    Envie-nos sua mensagem detalhada e retornaremos em até 2 horas úteis.
+                </p>
+                <span class="font-label-sm text-xs font-bold text-primary block pt-1">atendimento@hotchili.com.br</span>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-surface-container-low p-6 sm:p-8 rounded-sm border border-outline-variant/30 text-center space-y-3.5 shadow-xs hover:shadow-sm transition-shadow sm:col-span-2 lg:col-span-1">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
+                    <span class="material-symbols-outlined text-2xl">sync_alt</span>
+                </div>
+                <h3 class="font-display-lg text-lg sm:text-xl text-on-surface font-bold">Trocas &amp; Devoluções</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                    Primeira troca 100% gratuita em até 30 dias. Solicite com código de postagem sem custos.
+                </p>
+                <a href="#faq" class="font-label-sm text-xs text-primary underline underline-offset-4 font-bold block pt-1">
+                    Ver Como Funciona
+                </a>
+            </div>
+        </div>
+
+        <!-- Contact Form & FAQ Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
+            <!-- Left: Contact Form (6 cols) -->
+            <div class="lg:col-span-6 bg-surface-container-low p-5 sm:p-8 md:p-10 rounded-sm border border-outline-variant/30 space-y-5 sm:space-y-6 shadow-xs">
+                <div>
+                    <span class="font-label-sm text-xs text-primary font-bold uppercase tracking-wider">Envie uma Mensagem</span>
+                    <h2 class="font-display-lg text-xl sm:text-2xl text-on-surface font-bold mt-1">Fale com o Concierge</h2>
+                </div>
+
+                <form id="concierge-form" class="space-y-3.5 sm:space-y-4">
+                    <div>
+                        <label class="block text-xs font-label-sm uppercase tracking-wider text-on-surface mb-1">Nome Completo</label>
+                        <input type="text" class="w-full bg-surface border border-outline-variant rounded-sm px-3.5 py-2.5 text-base sm:text-sm focus:outline-none focus:border-primary" required/>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                        <div>
+                            <label class="block text-xs font-label-sm uppercase tracking-wider text-on-surface mb-1">E-mail</label>
+                            <input type="email" class="w-full bg-surface border border-outline-variant rounded-sm px-3.5 py-2.5 text-base sm:text-sm focus:outline-none focus:border-primary" required/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-label-sm uppercase tracking-wider text-on-surface mb-1">Número do Pedido (Opcional)</label>
+                            <input type="text" placeholder="#HC-0000" class="w-full bg-surface border border-outline-variant rounded-sm px-3.5 py-2.5 text-base sm:text-sm focus:outline-none focus:border-primary"/>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-label-sm uppercase tracking-wider text-on-surface mb-1">Assunto</label>
+                        <select class="w-full bg-surface border border-outline-variant rounded-sm px-3.5 py-2.5 text-base sm:text-sm focus:outline-none focus:border-primary">
+                            <option>Dúvidas sobre Tamanhos e Modelagem</option>
+                            <option>Trocas e Devoluções</option>
+                            <option>Acompanhamento de Pedido</option>
+                            <option>Parcerias e Imprensa</option>
+                            <option>Outros Assuntos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-label-sm uppercase tracking-wider text-on-surface mb-1">Sua Mensagem</label>
+                        <textarea rows="4" class="w-full bg-surface border border-outline-variant rounded-sm px-3.5 py-2.5 text-base sm:text-sm focus:outline-none focus:border-primary" required></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-primary text-on-primary font-label-sm text-xs uppercase tracking-[0.2em] font-bold rounded-sm hover:bg-primary-container transition-colors shadow-md active:scale-[0.99]">
+                        Enviar Mensagem ao Concierge
+                    </button>
+                    <div id="form-success-msg" class="hidden p-3 bg-emerald-100 text-emerald-900 text-xs rounded-sm text-center font-semibold">
+                        ✓ Mensagem recebida! Nosso concierge responderá em breve.
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: FAQ Accordions (6 cols) -->
+            <div class="lg:col-span-6 space-y-4 sm:space-y-6" id="faq">
+                <div>
+                    <span class="font-label-sm text-xs text-primary font-bold uppercase tracking-wider">Tire suas Dúvidas</span>
+                    <h2 class="font-display-lg text-xl sm:text-2xl text-on-surface font-bold mt-1">Perguntas Frequentes</h2>
+                </div>
+
+                <div class="divide-y divide-outline-variant/30 border-y border-outline-variant/30">
+                    <details class="py-4 group cursor-pointer" open>
+                        <summary class="flex justify-between items-center font-display-lg text-sm sm:text-base text-on-surface font-bold">
+                            <span>Como funciona a política de Trocas e Devoluções?</span>
+                            <span class="material-symbols-outlined text-primary text-base transition-transform group-open:rotate-180 flex-shrink-0 ml-2">expand_more</span>
+                        </summary>
+                        <p class="pt-2.5 text-xs text-on-surface-variant leading-relaxed">
+                            Você tem até 30 dias corridos após a entrega para solicitar a troca ou devolução de qualquer peça. A peça deve estar com etiquetas originais, protetor higiênico intacto e sem sinais de uso ou lavagem. A primeira troca é 100% gratuita com código reverso dos Correios.
+                        </p>
+                    </details>
+
+                    <details class="py-4 group cursor-pointer">
+                        <summary class="flex justify-between items-center font-display-lg text-sm sm:text-base text-on-surface font-bold">
+                            <span>Quais são os prazos e opções de Frete?</span>
+                            <span class="material-symbols-outlined text-primary text-base transition-transform group-open:rotate-180 flex-shrink-0 ml-2">expand_more</span>
+                        </summary>
+                        <p class="pt-2.5 text-xs text-on-surface-variant leading-relaxed">
+                            Oferecemos Frete Grátis Express para todo o Brasil em compras a partir de R$ 390. Para capitais do Sudeste e Sul, a entrega expressa ocorre em média entre 2 e 4 dias úteis. Também disponibilizamos Sedex Luxo 24h para envio prioritário.
+                        </p>
+                    </details>
+
+                    <details class="py-4 group cursor-pointer">
+                        <summary class="flex justify-between items-center font-display-lg text-sm sm:text-base text-on-surface font-bold">
+                            <span>Como cuidar e conservar os metais banhados a ouro das peças?</span>
+                            <span class="material-symbols-outlined text-primary text-base transition-transform group-open:rotate-180 flex-shrink-0 ml-2">expand_more</span>
+                        </summary>
+                        <p class="pt-2.5 text-xs text-on-surface-variant leading-relaxed">
+                            Nossos acessórios recebem banho especial de ouro 18k com verniz de proteção contra água salgada e cloro. Recomendamos enxaguar as peças em água doce imediatamente após o banho de mar/piscina e secar à sombra.
+                        </p>
+                    </details>
+
+                    <details class="py-4 group cursor-pointer">
+                        <summary class="flex justify-between items-center font-display-lg text-sm sm:text-base text-on-surface font-bold">
+                            <span>Como rastrear o status do meu pedido?</span>
+                            <span class="material-symbols-outlined text-primary text-base transition-transform group-open:rotate-180 flex-shrink-0 ml-2">expand_more</span>
+                        </summary>
+                        <p class="pt-2.5 text-xs text-on-surface-variant leading-relaxed">
+                            Assim que seu pedido for despachado pelo nosso centro de distribuição, você receberá um e-mail e uma mensagem no WhatsApp com o link de rastreamento em tempo real dos Correios ou transportadora VIP.
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-root"></div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

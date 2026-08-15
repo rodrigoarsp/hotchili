@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0" name="viewport"/>
+    <title>Guia de Tamanhos &amp; Caimento | Hot Chili Luxury Beachwear</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..800&amp;family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS & Global Stylesheet -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="js/config/tailwind-theme.js"></script>
+    <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body data-page-id="guia-tamanhos" class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+    <div id="header-root"></div>
+
+    <main class="pt-20 sm:pt-24 lg:pt-28 pb-16 px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto">
+        <!-- Hero Header (Renderizado dinamicamente via Hero.js & SizeGuidePage.js) -->
+        <div id="hero-root"></div>
+
+        <!-- How to Measure Section -->
+        <section class="bg-surface-container-low p-5 sm:p-8 md:p-12 rounded-sm border border-outline-variant/30 mb-10 sm:mb-16 shadow-xs">
+            <div class="text-center mb-8 sm:mb-10">
+                <span class="font-label-sm text-xs text-primary font-bold uppercase tracking-wider">Passo a Passo</span>
+                <h2 class="font-display-lg text-xl sm:text-2xl md:text-3xl text-on-surface font-bold mt-1">Como Tirar Suas Medidas</h2>
+                <p class="text-xs text-on-surface-variant mt-1">Utilize uma fita métrica maleável e mantenha-a nivelada com o chão sem apertar.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                <div class="space-y-2.5 p-5 bg-surface rounded-sm border border-outline-variant/20">
+                    <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center font-label-sm">01</span>
+                    <h3 class="font-display-lg text-base sm:text-lg text-on-surface font-bold">Busto</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        Passe a fita métrica sobre a parte mais saliente dos seios e ao redor das costas, mantendo os braços relaxados.
+                    </p>
+                </div>
+
+                <div class="space-y-2.5 p-5 bg-surface rounded-sm border border-outline-variant/20">
+                    <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center font-label-sm">02</span>
+                    <h3 class="font-display-lg text-base sm:text-lg text-on-surface font-bold">Cintura</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        Meça a circunferência no ponto mais estreito do seu tronco, aproximadamente dois dedos acima da altura do umbigo.
+                    </p>
+                </div>
+
+                <div class="space-y-2.5 p-5 bg-surface rounded-sm border border-outline-variant/20">
+                    <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center font-label-sm">03</span>
+                    <h3 class="font-display-lg text-base sm:text-lg text-on-surface font-bold">Quadril</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        Contorne a parte mais larga dos quadris e glúteos com a fita reta para garantir um caimento fluído e sem marcar.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Category Selector Tabs -->
+        <div class="flex justify-start sm:justify-center gap-1.5 sm:gap-2 mb-8 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar" id="tab-nav">
+            <button id="tab-fem" class="tab-btn px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-[11px] sm:text-xs uppercase tracking-wider font-semibold shadow-xs border border-primary transition-all duration-200 flex-shrink-0">
+                Biquínis &amp; Maiôs
+            </button>
+            <button id="tab-masc" class="tab-btn px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-transparent hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-[11px] sm:text-xs uppercase tracking-wider border border-outline-variant/30 hover:border-primary/40 transition-colors duration-200 flex-shrink-0">
+                Sungas Masculinas
+            </button>
+            <button id="tab-kids" class="tab-btn px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-transparent hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-[11px] sm:text-xs uppercase tracking-wider border border-outline-variant/30 hover:border-primary/40 transition-colors duration-200 flex-shrink-0">
+                Kids &amp; Juvenil
+            </button>
+        </div>
+
+        <!-- Tables -->
+        <!-- Table 1: Feminino -->
+        <div id="table-fem" class="table-content bg-surface-container-low rounded-sm border border-outline-variant/30 overflow-hidden shadow-xs">
+            <div class="p-4 sm:p-6 bg-surface border-b border-outline-variant/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4">
+                <h3 class="font-display-lg text-lg sm:text-xl text-on-surface font-bold">Moda Banho Feminina</h3>
+                <span class="text-[11px] sm:text-xs text-on-surface-variant font-label-sm uppercase">Medidas em centímetros (cm)</span>
+            </div>
+            <div class="table-responsive-container">
+                <table class="w-full text-left text-sm min-w-[500px]">
+                    <thead class="bg-surface-container font-label-sm text-xs uppercase tracking-wider text-on-surface border-b border-outline-variant/30">
+                        <tr>
+                            <th class="p-3.5 sm:p-4">Tamanho</th>
+                            <th class="p-3.5 sm:p-4">Manequim</th>
+                            <th class="p-3.5 sm:p-4">Busto (cm)</th>
+                            <th class="p-3.5 sm:p-4">Cintura (cm)</th>
+                            <th class="p-3.5 sm:p-4">Quadril (cm)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/20 font-body-md text-xs sm:text-sm">
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">PP</td>
+                            <td class="p-3.5 sm:p-4">34</td>
+                            <td class="p-3.5 sm:p-4">78 - 82 cm</td>
+                            <td class="p-3.5 sm:p-4">58 - 62 cm</td>
+                            <td class="p-3.5 sm:p-4">86 - 90 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors bg-surface/40">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">P</td>
+                            <td class="p-3.5 sm:p-4">36 - 38</td>
+                            <td class="p-3.5 sm:p-4">83 - 87 cm</td>
+                            <td class="p-3.5 sm:p-4">63 - 67 cm</td>
+                            <td class="p-3.5 sm:p-4">91 - 95 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">M</td>
+                            <td class="p-3.5 sm:p-4">40 - 42</td>
+                            <td class="p-3.5 sm:p-4">88 - 92 cm</td>
+                            <td class="p-3.5 sm:p-4">68 - 72 cm</td>
+                            <td class="p-3.5 sm:p-4">96 - 100 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors bg-surface/40">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">G</td>
+                            <td class="p-3.5 sm:p-4">44</td>
+                            <td class="p-3.5 sm:p-4">93 - 97 cm</td>
+                            <td class="p-3.5 sm:p-4">73 - 77 cm</td>
+                            <td class="p-3.5 sm:p-4">101 - 105 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">GG</td>
+                            <td class="p-3.5 sm:p-4">46</td>
+                            <td class="p-3.5 sm:p-4">98 - 102 cm</td>
+                            <td class="p-3.5 sm:p-4">78 - 82 cm</td>
+                            <td class="p-3.5 sm:p-4">106 - 110 cm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table 2: Masculino -->
+        <div id="table-masc" class="table-content bg-surface-container-low rounded-sm border border-outline-variant/30 overflow-hidden shadow-xs hidden">
+            <div class="p-4 sm:p-6 bg-surface border-b border-outline-variant/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4">
+                <h3 class="font-display-lg text-lg sm:text-xl text-on-surface font-bold">Sungas Masculinas</h3>
+                <span class="text-[11px] sm:text-xs text-on-surface-variant font-label-sm uppercase">Medidas em centímetros (cm)</span>
+            </div>
+            <div class="table-responsive-container">
+                <table class="w-full text-left text-sm min-w-[500px]">
+                    <thead class="bg-surface-container font-label-sm text-xs uppercase tracking-wider text-on-surface border-b border-outline-variant/30">
+                        <tr>
+                            <th class="p-3.5 sm:p-4">Tamanho</th>
+                            <th class="p-3.5 sm:p-4">Manequim Calça</th>
+                            <th class="p-3.5 sm:p-4">Cintura (cm)</th>
+                            <th class="p-3.5 sm:p-4">Quadril (cm)</th>
+                            <th class="p-3.5 sm:p-4">Lateral</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/20 font-body-md text-xs sm:text-sm">
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">P</td>
+                            <td class="p-3.5 sm:p-4">38</td>
+                            <td class="p-3.5 sm:p-4">76 - 80 cm</td>
+                            <td class="p-3.5 sm:p-4">90 - 94 cm</td>
+                            <td class="p-3.5 sm:p-4">12 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors bg-surface/40">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">M</td>
+                            <td class="p-3.5 sm:p-4">40 - 42</td>
+                            <td class="p-3.5 sm:p-4">81 - 86 cm</td>
+                            <td class="p-3.5 sm:p-4">95 - 100 cm</td>
+                            <td class="p-3.5 sm:p-4">13 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">G</td>
+                            <td class="p-3.5 sm:p-4">44</td>
+                            <td class="p-3.5 sm:p-4">87 - 92 cm</td>
+                            <td class="p-3.5 sm:p-4">101 - 106 cm</td>
+                            <td class="p-3.5 sm:p-4">14 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors bg-surface/40">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">GG</td>
+                            <td class="p-3.5 sm:p-4">46 - 48</td>
+                            <td class="p-3.5 sm:p-4">93 - 98 cm</td>
+                            <td class="p-3.5 sm:p-4">107 - 112 cm</td>
+                            <td class="p-3.5 sm:p-4">15 cm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table 3: Kids -->
+        <div id="table-kids" class="table-content bg-surface-container-low rounded-sm border border-outline-variant/30 overflow-hidden shadow-xs hidden">
+            <div class="p-4 sm:p-6 bg-surface border-b border-outline-variant/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4">
+                <h3 class="font-display-lg text-lg sm:text-xl text-on-surface font-bold">Linha Kids &amp; Juvenil</h3>
+                <span class="text-[11px] sm:text-xs text-on-surface-variant font-label-sm uppercase">Idade aproximada &amp; Altura</span>
+            </div>
+            <div class="table-responsive-container">
+                <table class="w-full text-left text-sm min-w-[500px]">
+                    <thead class="bg-surface-container font-label-sm text-xs uppercase tracking-wider text-on-surface border-b border-outline-variant/30">
+                        <tr>
+                            <th class="p-3.5 sm:p-4">Tamanho</th>
+                            <th class="p-3.5 sm:p-4">Idade</th>
+                            <th class="p-3.5 sm:p-4">Altura (cm)</th>
+                            <th class="p-3.5 sm:p-4">Tórax / Busto</th>
+                            <th class="p-3.5 sm:p-4">Quadril</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/20 font-body-md text-xs sm:text-sm">
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">02</td>
+                            <td class="p-3.5 sm:p-4">1 a 2 anos</td>
+                            <td class="p-3.5 sm:p-4">86 - 92 cm</td>
+                            <td class="p-3.5 sm:p-4">50 - 52 cm</td>
+                            <td class="p-3.5 sm:p-4">52 - 54 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors bg-surface/40">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">04</td>
+                            <td class="p-3.5 sm:p-4">3 a 4 anos</td>
+                            <td class="p-3.5 sm:p-4">98 - 104 cm</td>
+                            <td class="p-3.5 sm:p-4">54 - 56 cm</td>
+                            <td class="p-3.5 sm:p-4">56 - 60 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">06</td>
+                            <td class="p-3.5 sm:p-4">5 a 6 anos</td>
+                            <td class="p-3.5 sm:p-4">110 - 116 cm</td>
+                            <td class="p-3.5 sm:p-4">58 - 62 cm</td>
+                            <td class="p-3.5 sm:p-4">62 - 66 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors bg-surface/40">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">08</td>
+                            <td class="p-3.5 sm:p-4">7 a 8 anos</td>
+                            <td class="p-3.5 sm:p-4">122 - 128 cm</td>
+                            <td class="p-3.5 sm:p-4">64 - 68 cm</td>
+                            <td class="p-3.5 sm:p-4">68 - 72 cm</td>
+                        </tr>
+                        <tr class="hover:bg-surface transition-colors">
+                            <td class="p-3.5 sm:p-4 font-bold text-primary">10 / 12</td>
+                            <td class="p-3.5 sm:p-4">9 a 12 anos</td>
+                            <td class="p-3.5 sm:p-4">134 - 150 cm</td>
+                            <td class="p-3.5 sm:p-4">70 - 76 cm</td>
+                            <td class="p-3.5 sm:p-4">74 - 82 cm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Stylist Concierge Card -->
+        <div class="mt-12 sm:mt-16 p-6 sm:p-8 md:p-10 bg-primary/10 rounded-sm border border-primary/30 flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6">
+            <div class="space-y-1.5 text-center md:text-left">
+                <h3 class="font-display-lg text-xl sm:text-2xl text-on-surface font-bold">Dúvidas entre dois tamanhos?</h3>
+                <p class="text-xs sm:text-sm text-on-surface-variant max-w-xl leading-relaxed">
+                    Nossos consultores de estilo e modelagem atendem em tempo real no WhatsApp para ajudar você a selecionar a peça com caimento ideal.
+                </p>
+            </div>
+            <a href="https://wa.me/5511999999999" target="_blank" class="w-full sm:w-auto py-3.5 px-8 bg-primary text-on-primary font-label-sm text-xs uppercase tracking-widest font-bold rounded-sm hover:bg-primary-container transition-colors shadow-md text-center flex-shrink-0 active:scale-95">
+                Falar com Personal Stylist
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-root"></div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

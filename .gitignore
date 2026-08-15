@@ -1,0 +1,19 @@
+# Dependências
+node_modules/
+dist/
+build/
+
+# Ambientes e Logs
+.env
+.env.local
+*.log
+npm-debug.log*
+
+# IDEs e Ferramentas
+.agents/
+.stitch/
+temp_stitch_skills/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

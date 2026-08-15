@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0" name="viewport"/>
+    <title>Biquíni Ouro Solar | Hot Chili Luxury Beachwear</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..800&amp;family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS & Global Stylesheet -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="js/config/tailwind-theme.js"></script>
+    <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body data-page-id="produto" class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+    <div id="header-root"></div>
+
+    <main class="pt-14 sm:pt-16 lg:pt-[65px]">
+        <!-- Painel 2: SubNavBar (Chips e Breadcrumbs renderizados dinamicamente pelo ProductPage.js) -->
+        <div id="subnav-root"></div>
+
+        <!-- Main Product Content -->
+        <div class="pt-4 sm:pt-6 md:pt-8 pb-12 sm:pb-16 px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto">
+            <!-- Product Showcase Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-14 items-start">
+            <!-- Left: Editorial Gallery (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col-reverse md:flex-row gap-3 sm:gap-4">
+                <!-- Thumbnails -->
+                <div class="flex md:flex-col gap-2.5 sm:gap-3 overflow-x-auto md:overflow-y-auto hide-scrollbar flex-shrink-0 -mx-4 px-4 md:mx-0 md:px-0 py-1" id="product-thumbnails">
+                    <button class="thumb-btn border-2 border-primary rounded-sm overflow-hidden w-16 h-22 sm:w-20 sm:h-28 bg-surface-container flex-shrink-0 transition-transform duration-300 active:scale-95">
+                        <img id="thumb-1" src="" alt="Thumbnail 1" class="w-full h-full object-cover"/>
+                    </button>
+                    <button class="thumb-btn border-2 border-transparent hover:border-primary/50 rounded-sm overflow-hidden w-16 h-22 sm:w-20 sm:h-28 bg-surface-container flex-shrink-0 transition-transform duration-300 active:scale-95">
+                        <img id="thumb-2" src="" alt="Thumbnail 2" class="w-full h-full object-cover"/>
+                    </button>
+                    <button class="thumb-btn border-2 border-transparent hover:border-primary/50 rounded-sm overflow-hidden w-16 h-22 sm:w-20 sm:h-28 bg-surface-container flex-shrink-0 transition-transform duration-300 active:scale-95">
+                        <img id="thumb-3" src="" alt="Thumbnail 3" class="w-full h-full object-cover"/>
+                    </button>
+                </div>
+
+                <!-- Main Hero Image -->
+                <div class="relative flex-grow aspect-[3/4] bg-surface-container-low rounded-sm overflow-hidden shadow-[0_10px_30px_rgba(123,88,0,0.06)] group">
+                    <img id="main-product-image" src="" alt="Produto Principal" class="w-full h-full object-cover zoom-img"/>
+                    <span id="product-badge" class="absolute top-3 left-3 sm:top-4 sm:left-4 bg-primary text-on-primary font-label-sm text-[10px] sm:text-xs uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-sm">
+                        Bestseller
+                    </span>
+                    <button id="favorite-btn" aria-label="Favoritar" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface/85 backdrop-blur-xs flex items-center justify-center text-primary hover:text-primary-container transition-colors shadow-xs active:scale-95">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">favorite_border</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Product Info & Purchase (5 cols) -->
+            <div class="lg:col-span-5 space-y-5 sm:space-y-6 lg:sticky lg:top-24">
+                <div>
+                    <span class="font-label-sm text-xs text-primary font-bold uppercase tracking-[0.2em] block mb-1.5" id="product-category-label">Moda Banho Luxury</span>
+                    <h1 id="product-title" class="font-display-lg text-2xl sm:text-3xl md:text-4xl text-on-surface font-bold mb-2 sm:mb-3 leading-tight">
+                        Biquíni Ouro Solar
+                    </h1>
+                    <div class="flex items-center gap-3">
+                        <span id="product-price" class="font-display-lg text-2xl sm:text-3xl text-primary font-bold">R$ 498,00</span>
+                        <span class="text-xs sm:text-sm text-on-surface-variant/80 font-body-md">em até 6x sem juros</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-emerald-800 font-semibold mt-1">
+                        ou <span id="product-pix-price" class="font-bold">R$ 473,10</span> no PIX (5% de desconto)
+                    </p>
+                </div>
+
+                <p id="product-description" class="font-body-md text-on-surface-variant leading-relaxed text-sm">
+                    Biquíni sofisticado com detalhes banhados a ouro e tecido tecnológico com proteção UV50+. Modelagem anatômica perfeita para o verão.
+                </p>
+
+                <!-- Color Selection -->
+                <div>
+                    <label class="block font-label-sm text-xs uppercase tracking-wider text-on-surface mb-2 font-bold">
+                        Cor: <span id="selected-color-name" class="font-normal text-on-surface-variant">Textured Gold</span>
+                    </label>
+                    <div class="flex gap-3" id="color-swatches">
+                        <button data-color="Textured Gold" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#c59940] ring-2 ring-offset-2 ring-primary transition-all active:scale-95" aria-label="Cor Textured Gold"></button>
+                        <button data-color="Obsidian Noir" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1c1b1b] hover:ring-2 hover:ring-primary transition-all active:scale-95" aria-label="Cor Obsidian Noir"></button>
+                        <button data-color="Branco Areia" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f8f9fa] border border-outline-variant hover:ring-2 hover:ring-primary transition-all active:scale-95" aria-label="Cor Branco Areia"></button>
+                    </div>
+                </div>
+
+                <!-- Size Selection -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="font-label-sm text-xs uppercase tracking-wider text-on-surface font-bold">Tamanho:</label>
+                        <a href="guia-tamanhos.html" class="font-label-sm text-xs text-primary underline underline-offset-4 hover:opacity-80 py-1">Guia de Tamanhos</a>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2.5 sm:gap-3" id="size-options">
+                        <button data-size="P" class="size-btn py-3 sm:py-3.5 border border-outline-variant font-label-sm text-xs uppercase tracking-widest text-on-surface hover:border-primary transition-colors active rounded-xs">P</button>
+                        <button data-size="M" class="size-btn py-3 sm:py-3.5 border border-outline-variant font-label-sm text-xs uppercase tracking-widest text-on-surface hover:border-primary transition-colors rounded-xs">M</button>
+                        <button data-size="G" class="size-btn py-3 sm:py-3.5 border border-outline-variant font-label-sm text-xs uppercase tracking-widest text-on-surface hover:border-primary transition-colors rounded-xs">G</button>
+                        <button data-size="GG" class="size-btn py-3 sm:py-3.5 border border-outline-variant font-label-sm text-xs uppercase tracking-widest text-on-surface hover:border-primary transition-colors rounded-xs">GG</button>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="pt-2 space-y-3">
+                    <button id="add-to-bag-btn" class="w-full py-4 bg-on-surface text-primary-fixed-dim font-label-sm text-xs sm:text-sm uppercase tracking-[0.2em] font-bold rounded-sm hover:bg-primary transition-colors shadow-lg flex items-center justify-center gap-2 active:scale-[0.99]">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">shopping_bag</span>
+                        Adicionar à Sacola
+                    </button>
+                    <a href="checkout.html" class="w-full py-3.5 sm:py-4 bg-primary text-on-primary font-label-sm text-xs sm:text-sm uppercase tracking-[0.2em] font-bold rounded-sm hover:bg-primary-container text-center block transition-colors shadow-md active:scale-[0.99]">
+                        Comprar Agora
+                    </a>
+                </div>
+
+                <!-- Shipping Estimator -->
+                <div class="p-4 bg-surface-container rounded-sm border border-outline-variant/30 space-y-3">
+                    <label class="font-label-sm text-xs uppercase tracking-wider text-on-surface font-bold block">
+                        Calcular Frete e Prazo
+                    </label>
+                    <div class="flex gap-2">
+                        <input id="cep-input" type="text" inputmode="numeric" placeholder="00000-000" maxlength="9" class="bg-surface border border-outline-variant rounded-sm px-3.5 py-2.5 text-base sm:text-sm w-full focus:outline-none focus:border-primary"/>
+                        <button id="cep-btn" class="px-5 py-2.5 bg-on-surface text-on-primary font-label-sm text-xs uppercase tracking-wider rounded-sm hover:bg-primary transition-colors flex-shrink-0 active:scale-95">Calcular</button>
+                    </div>
+                    <div id="cep-result" class="hidden text-xs text-on-surface-variant pt-2 space-y-1">
+                        <p class="text-emerald-800 font-semibold">✓ Frete Grátis Express (3 a 5 dias úteis)</p>
+                        <p>Sedex Luxo (1 a 2 dias úteis) - R$ 24,90</p>
+                    </div>
+                </div>
+
+                <!-- Accordions -->
+                <div class="border-t border-outline-variant/30 divide-y divide-outline-variant/30 pt-1 text-sm">
+                    <details class="py-3.5 group cursor-pointer">
+                        <summary class="flex justify-between items-center font-label-sm text-xs uppercase tracking-wider font-bold text-on-surface">
+                            Composição &amp; Tecnologia UV50+
+                            <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
+                        </summary>
+                        <p class="pt-2.5 text-xs text-on-surface-variant leading-relaxed">
+                            84% Poliamida biodegradável, 16% Elastano com proteção solar máxima UPF50+. Fios selecionados com toque acetinado e detalhes em metal antioxidante banhados a ouro 18k.
+                        </p>
+                    </details>
+                    <details class="py-3.5 group cursor-pointer">
+                        <summary class="flex justify-between items-center font-label-sm text-xs uppercase tracking-wider font-bold text-on-surface">
+                            Cuidados &amp; Conservação
+                            <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
+                        </summary>
+                        <p class="pt-2.5 text-xs text-on-surface-variant leading-relaxed">
+                            Lavar à mão com sabão neutro e água fria logo após o uso. Não utilizar alvejante ou máquina de secar. Secar à sombra para preservar a vivacidade das cores e os acabamentos metálicos.
+                        </p>
+                    </details>
+                    <details class="py-3.5 group cursor-pointer">
+                        <summary class="flex justify-between items-center font-label-sm text-xs uppercase tracking-wider font-bold text-on-surface">
+                            Trocas e Devoluções Grátis
+                            <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
+                        </summary>
+                        <p class="pt-2.5 text-xs text-on-surface-variant leading-relaxed">
+                            Primeira troca totalmente gratuita em até 30 dias após o recebimento. Solicite diretamente pelo nosso painel de atendimento com postagem sem custos.
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete o Look (Renderizado dinamicamente via ProductGrid.js & ProductPage.js) -->
+        <div id="related-products-root"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-root"></div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

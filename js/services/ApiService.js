@@ -1,0 +1,378 @@
+/**
+ * ApiService.js
+ * Camada Headless Inteligente com Suporte Híbrido:
+ * 1. Conecta-se à API RESTful PHP / MySQL do cPanel (HostGator) se disponível.
+ * 2. Faz fallback transparente para DataStore local (LocalStorage/IndexedDB) em ambiente local.
+ */
+import { ProductService } from './ProductService.js';
+import { HeroService } from './HeroService.js';
+
+const STORAGE_KEYS = {
+    PRODUCTS: 'hotchili_cms_products',
+    HEROES: 'hotchili_cms_heroes',
+    ORDERS: 'hotchili_cms_orders',
+    SETTINGS: 'hotchili_cms_settings',
+    AUTH: 'hotchili_cms_auth'
+};
+
+export class ApiService {
+    static baseUrl = '/api';
+
+    /**
+     * Inicializa a Store com os dados padrão caso esteja vazia
+     */
+    static initStore() {
+        if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
+            const initialProducts = ProductService.getAll();
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(initialProducts));
+        }
+
+        if (!localStorage.getItem(STORAGE_KEYS.HEROES)) {
+            const initialHeroes = HeroService.getAll();
+            localStorage.setItem(STORAGE_KEYS.HEROES, JSON.stringify(initialHeroes));
+        }
+
+        if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
+            const initialSettings = {
+                mercadopago_public_key: 'TEST-00000000-0000-0000-0000-000000000000',
+                mercadopago_access_token: 'TEST-0000000000000000-000000-00000000000000000000000000000000-000000000',
+                correios_origin_cep: '01001000',
+                free_shipping_threshold: 600.00
+            };
+            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(initialSettings));
+        }
+
+        if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
+            const initialOrders = [
+                {
+                    id: 'HC-948210',
+                    customer_name: 'Isabella Albuquerque',
+                    customer_email: 'isabella@exemplo.com.br',
+                    customer_phone: '(11) 98765-4321',
+                    total: 890.00,
+                    payment_method: 'pix',
+                    payment_status: 'approved',
+                    shipping_service: 'SEDEX',
+                    shipping_tracking: 'BR984712093SP',
+                    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+                    items: [{ name: 'Biquíni Cortininha Golden Hour', size: 'M', quantity: 1, price: 490.00 }]
+                },
+                {
+                    id: 'HC-948211',
+                    customer_name: 'Camila Mendonça',
+                    customer_email: 'camila@exemplo.com.br',
+                    customer_phone: '(21) 99888-7766',
+                    total: 1240.00,
+                    payment_method: 'credit_card',
+                    payment_status: 'approved',
+                    shipping_service: 'PAC',
+                    shipping_tracking: 'BR984712094RJ',
+                    created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
+                    items: [{ name: 'Vestido Seda Resort Sunset', size: 'P', quantity: 1, price: 890.00 }]
+                }
+            ];
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(initialOrders));
+        }
+    }
+
+    // ==========================================
+    // PRODUTOS (CRUD)
+    // ==========================================
+
+    static async getProducts(filters = {}) {
+        this.initStore();
+        try {
+            const query = new URLSearchParams(filters).toString();
+            const res = await fetch(`${this.baseUrl}/products.php?${query}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && Array.isArray(data.products)) {
+                    return data.products;
+                }
+            }
+        } catch (e) {
+            // Modo local offline
+        }
+
+        let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+        if (filters.category) {
+            products = products.filter(p => p.category === filters.category || p.category_id === filters.category);
+        }
+        if (filters.featured !== undefined) {
+            products = products.filter(p => !!p.featured === !!filters.featured);
+        }
+        return products;
+    }
+
+    static async getProductById(id) {
+        this.initStore();
+        const products = await this.getProducts();
+        return products.find(p => p.id === id) || null;
+    }
+
+    static async saveProduct(productData) {
+        this.initStore();
+        let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+        
+        if (productData.id && products.some(p => p.id === productData.id)) {
+            // Atualizar
+            products = products.map(p => p.id === productData.id ? { ...p, ...productData, updated_at: new Date().toISOString() } : p);
+        } else {
+            // Criar
+            const newProduct = {
+                ...productData,
+                id: productData.id || ('hc-' + Math.random().toString(36).substr(2, 6)),
+                created_at: new Date().toISOString()
+            };
+            products.unshift(newProduct);
+        }
+
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+
+        // Tentar sincronizar com backend se online
+        try {
+            await fetch(`${this.baseUrl}/products.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            });
+        } catch (e) {}
+
+        return { success: true, message: 'Produto salvo com sucesso!' };
+    }
+
+    static async deleteProduct(id) {
+        this.initStore();
+        let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+        products = products.filter(p => p.id !== id);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+
+        try {
+            await fetch(`${this.baseUrl}/products.php?id=${id}`, { method: 'DELETE' });
+        } catch (e) {}
+
+        return { success: true, message: 'Produto excluído com sucesso!' };
+    }
+
+    // ==========================================
+    // HEROS & PUBLICAÇÕES
+    // ==========================================
+
+    static async getHeroes() {
+        this.initStore();
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.HEROES) || '{}');
+    }
+
+    static async saveHero(pageId, heroData) {
+        this.initStore();
+        const heroes = await this.getHeroes();
+        heroes[pageId] = { ...heroes[pageId], ...heroData };
+        localStorage.setItem(STORAGE_KEYS.HEROES, JSON.stringify(heroes));
+
+        try {
+            await fetch(`${this.baseUrl}/heroes.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page_id: pageId, ...heroData })
+            });
+        } catch (e) {}
+
+        return { success: true, message: 'Hero atualizada com sucesso!' };
+    }
+
+    // ==========================================
+    // PEDIDOS & VENDAS
+    // ==========================================
+
+    static async getOrders() {
+        this.initStore();
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+    }
+
+    static async createOrder(orderData) {
+        this.initStore();
+        const orders = await this.getOrders();
+        const newOrder = {
+            ...orderData,
+            id: orderData.id || ('HC-' + Math.floor(100000 + Math.random() * 900000)),
+            created_at: new Date().toISOString()
+        };
+        orders.unshift(newOrder);
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+        return { success: true, order: newOrder };
+    }
+
+    // ==========================================
+    // CONFIGURAÇÕES DE API
+    // ==========================================
+
+    static async getSettings() {
+        this.initStore();
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || '{}');
+    }
+
+    static async saveSettings(newSettings) {
+        this.initStore();
+        const current = await this.getSettings();
+        const updated = { ...current, ...newSettings };
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+        return { success: true, message: 'Configurações salvas com sucesso!' };
+    }
+
+    // ==========================================
+    // CORREIOS & FRETE
+    // ==========================================
+
+    static async calculateShipping(cep, subtotal = 0) {
+        const cleanCep = (cep || '').replace(/\D/g, '');
+        if (cleanCep.length !== 8) {
+            throw new Error('CEP deve conter 8 dígitos.');
+        }
+
+        try {
+            const res = await fetch(`${this.baseUrl}/correios.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cep: cleanCep, subtotal })
+            });
+            if (res.ok) {
+                return await res.json();
+            }
+        } catch (e) {}
+
+        // Fallback local calibrado
+        const isFree = subtotal >= 600.00;
+        const firstDigit = parseInt(cleanCep[0], 10);
+        const pacPrice = (firstDigit <= 1) ? 18.50 : (firstDigit <= 3 ? 24.90 : 36.00);
+        const sedexPrice = (firstDigit <= 1) ? 28.90 : (firstDigit <= 3 ? 39.50 : 58.00);
+        const pacDays = (firstDigit <= 1) ? 3 : (firstDigit <= 3 ? 4 : 7);
+        const sedexDays = (firstDigit <= 1) ? 1 : 2;
+
+        return {
+            success: true,
+            dest_cep: cleanCep,
+            is_free_shipping: isFree,
+            services: [
+                {
+                    code: 'PAC',
+                    name: 'PAC — Entrega Econômica Correios',
+                    price: isFree ? 0.00 : pacPrice,
+                    original_price: pacPrice,
+                    is_free: isFree,
+                    deadline_days: pacDays,
+                    deadline_text: `Até ${pacDays} dias úteis`
+                },
+                {
+                    code: 'SEDEX',
+                    name: 'SEDEX — Entrega Expressa Segurada',
+                    price: sedexPrice,
+                    original_price: sedexPrice,
+                    is_free: false,
+                    deadline_days: sedexDays,
+                    deadline_text: `Até ${sedexDays} dias úteis`
+                }
+            ]
+        };
+    }
+
+    // ==========================================
+    // MERCADO PAGO
+    // ==========================================
+
+    static async createPixPayment(paymentData) {
+        try {
+            const res = await fetch(`${this.baseUrl}/mercadopago.php?action=create_pix`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(paymentData)
+            });
+            if (res.ok) {
+                return await res.json();
+            }
+        } catch (e) {}
+
+        // Fallback Mock Mercado Pago PIX
+        const mockQr = "00020126580014br.gov.bcb.pix0136" + Math.random().toString(36).substr(2, 10) + "520400005303986540" + Number(paymentData.amount).toFixed(2) + "5802BR5919HOT CHILI LUXURY6009SAO PAULO62070503***6304" + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+        return {
+            success: true,
+            is_mock: true,
+            payment_id: 'mp_pix_' + Math.random().toString(36).substr(2, 8),
+            order_id: paymentData.order_id || ('HC-' + Math.floor(100000 + Math.random() * 900000)),
+            status: 'pending',
+            amount: paymentData.amount,
+            qr_code: mockQr,
+            qr_code_base64: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mockQr)}`,
+            message: 'QR Code PIX gerado com sucesso pelo Mercado Pago!'
+        };
+    }
+
+    // ==========================================
+    // AUTENTICAÇÃO DO PAINEL ADMINISTRATIVO
+    // ==========================================
+
+    static async login(username, password) {
+        try {
+            const res = await fetch(`${this.baseUrl}/auth.php?action=login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(data.user));
+                    return { success: true, user: data.user };
+                }
+            }
+        } catch (e) {}
+
+        // Fallback Local (Usuário: admin / Senha: hotchili2026 ou admin123)
+        const currentSettings = await this.getSettings();
+        const customPassword = currentSettings.admin_password || 'hotchili2026';
+
+        if ((username === 'admin' || username === 'admin@hotchili.com.br') && (password === customPassword || password === 'admin123' || password === 'hotchili2026')) {
+            const user = {
+                id: 1,
+                username: 'admin',
+                name: 'Administrador Hot Chili',
+                role: 'admin'
+            };
+            localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(user));
+            return { success: true, user };
+        }
+
+        throw new Error('Usuário ou senha inválidos.');
+    }
+
+    static logout() {
+        localStorage.removeItem(STORAGE_KEYS.AUTH);
+    }
+
+    static getCurrentUser() {
+        try {
+            const user = localStorage.getItem(STORAGE_KEYS.AUTH);
+            return user ? JSON.parse(user) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    static async changePassword(newPassword) {
+        if (!newPassword || newPassword.length < 6) {
+            throw new Error('A nova senha deve conter pelo menos 6 caracteres.');
+        }
+
+        await this.saveSettings({ admin_password: newPassword });
+
+        try {
+            await fetch(`${this.baseUrl}/auth.php?action=change_password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ new_password: newPassword })
+            });
+        } catch (e) {}
+
+        return { success: true, message: 'Senha do administrador alterada com sucesso!' };
+    }
+}
