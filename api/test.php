@@ -52,23 +52,15 @@ try {
         $status['products_count'] = (int)$pStmt->fetch()['count'];
     }
 
-    // Verificar heros
-    if (in_array('heroes', $tables)) {
-        $hStmt = $pdo->query("SELECT COUNT(*) as count FROM heroes");
-        $status['heroes_count'] = (int)$hStmt->fetch()['count'];
-    }
-
-    // Se o banco estiver vazio (tabelas não criadas ainda), auto-executar o schema!
-    if (empty($tables)) {
+    // Se heros estiver incompleto, auto-popular todas as 8 páginas!
+    if (in_array('heroes', $tables) && $status['heroes_count'] < 8) {
         $schemaPath = __DIR__ . '/schema.sql';
         if (file_exists($schemaPath)) {
             $sql = file_get_contents($schemaPath);
             $pdo->exec($sql);
-            $status['auto_install'] = 'Tabelas criadas e populadas automaticamente a partir do schema.sql!';
-            
-            // Recontar
-            $stmt = $pdo->query("SHOW TABLES");
-            $status['tables_found'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $hStmt = $pdo->query("SELECT COUNT(*) as count FROM heroes");
+            $status['heroes_count'] = (int)$hStmt->fetch()['count'];
+            $status['heroes_auto_synced'] = 'Todas as 8 páginas de Hero Sections foram sincronizadas no MySQL!';
         }
     }
 
