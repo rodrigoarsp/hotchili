@@ -3,7 +3,7 @@
  * Componente modular unificado para renderização de Vitrines e Grids de Produtos em todo o site.
  * Suporta cabeçalhos de seção, grid responsivo, estados vazios e micro-interações do carrinho.
  */
-import { formatCurrency } from '../utils/formatters.js';
+import { formatCurrency, formatImageUrl } from '../utils/formatters.js';
 import { $ } from '../utils/dom.js';
 
 export class ProductGrid {
@@ -128,7 +128,7 @@ export class ProductGrid {
             <article class="group cursor-pointer product-card flex flex-col h-full" data-product-id="${product.id}">
                 <div class="relative aspect-[3/4] overflow-hidden bg-surface-container-low mb-3 sm:mb-4 shadow-[0_8px_20px_-10px_rgba(123,88,0,0.06)] rounded-sm">
                     <a href="produto.html?id=${product.id}" class="block w-full h-full">
-                        <img src="${product.image}" alt="${product.name}" loading="lazy" class="w-full h-full object-cover zoom-img transition-transform duration-700 ease-out-quint group-hover:scale-105" />
+                        <img src="${formatImageUrl(product.image)}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';" class="w-full h-full object-cover zoom-img transition-transform duration-700 ease-out-quint group-hover:scale-105" />
                     </a>
                     
                     ${product.badge ? `

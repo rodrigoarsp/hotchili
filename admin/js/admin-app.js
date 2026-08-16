@@ -4,7 +4,7 @@
  * Inclui Gestão de Mídia com Upload, Colagem de URL, Pré-visualização e
  * Ferramenta Interativa de Reposicionamento (Pan/Drag) e Zoom para enquadramento perfeito.
  */
-import { ApiService } from '../../js/services/ApiService.js?v=2.7.0';
+import { ApiService } from '../../js/services/ApiService.js?v=2.8.0';
 
 class AdminApp {
     constructor() {
@@ -92,6 +92,23 @@ class AdminApp {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 300);
         }, 3500);
+    }
+
+    formatImg(url) {
+        if (!url || typeof url !== 'string') {
+            return 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
+        }
+        const trimmed = url.trim();
+        if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) {
+            return trimmed;
+        }
+        if (trimmed.startsWith('uploads/')) {
+            return '../' + trimmed;
+        }
+        if (trimmed.startsWith('/uploads/')) {
+            return '..' + trimmed;
+        }
+        return trimmed;
     }
 
     render() {
@@ -475,7 +492,7 @@ class AdminApp {
                                 ${filtered.map(p => `
                                     <tr class="hover:bg-surface-hover/40 transition-colors">
                                         <td class="py-3 px-4">
-                                            <img src="${p.image}" alt="${p.name}" class="w-12 h-14 object-cover rounded-md border border-surface-border shadow-xs" />
+                                            <img src="${this.formatImg(p.image)}" alt="${p.name}" onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';" class="w-12 h-14 object-cover rounded-md border border-surface-border shadow-xs" />
                                         </td>
                                         <td class="py-3 px-4">
                                             <div class="font-bold text-on-surface">${p.name}</div>

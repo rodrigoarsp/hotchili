@@ -71,3 +71,33 @@ export function formatPhone(phone) {
     }
     return clean;
 }
+
+/**
+ * Normaliza e resolve caminhos de imagem para garantir exibição correta em qualquer página ou subpasta (/admin/)
+ * @param {string} url
+ * @returns {string}
+ */
+export function formatImageUrl(url) {
+    if (!url || typeof url !== 'string') {
+        return 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
+    }
+
+    const trimmed = url.trim();
+
+    // Se for URL externa completa ou Data URL base64, retorna direto
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) {
+        return trimmed;
+    }
+
+    // Se começar com uploads/ ou /uploads/, converter para caminho raiz absoluto ou URL completa
+    if (trimmed.startsWith('uploads/')) {
+        return '/' + trimmed;
+    }
+
+    if (trimmed.startsWith('/uploads/')) {
+        return trimmed;
+    }
+
+    return trimmed;
+}
+

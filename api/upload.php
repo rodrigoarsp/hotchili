@@ -48,9 +48,10 @@ if ($method === 'POST') {
 
         if (@move_uploaded_file($file['tmp_name'], $destination)) {
             @chmod($destination, 0644);
+            $publicUrl = '/uploads/' . $filename;
             sendJson([
                 'success' => true,
-                'url' => 'uploads/' . $filename,
+                'url' => $publicUrl,
                 'filename' => $filename,
                 'size_kb' => round(filesize($destination) / 1024, 1),
                 'message' => 'Imagem enviada com sucesso!'
@@ -88,9 +89,10 @@ if ($method === 'POST') {
 
                 if (@file_put_contents($destination, $decoded)) {
                     @chmod($destination, 0644);
+                    $publicUrl = '/uploads/' . $filename;
                     sendJson([
                         'success' => true,
-                        'url' => 'uploads/' . $filename,
+                        'url' => $publicUrl,
                         'filename' => $filename,
                         'size_kb' => round(strlen($decoded) / 1024, 1),
                         'message' => 'Imagem otimizada e salva com sucesso!'
