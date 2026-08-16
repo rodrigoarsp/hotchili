@@ -1,14 +1,13 @@
 /**
  * HomePage.js
- * Lógica de inicialização, vitrine dinâmica de produtos e filtros da página inicial.
+ * Lógica de inicialização da página inicial sem a barra intermediária de filtros.
  */
 import { ProductService } from '../services/ProductService.js';
 import { ProductGrid } from '../components/ProductGrid.js';
-import { SubNavBar } from '../components/SubNavBar.js';
 import { Hero } from '../components/Hero.js';
 import { HeroService } from '../services/HeroService.js';
 import { ApiService } from '../services/ApiService.js';
-import { $$, updatePillState, showTemporaryFeedback, initScrollAnimations, $ } from '../utils/dom.js';
+import { $, showTemporaryFeedback, initScrollAnimations } from '../utils/dom.js';
 
 export class HomePage {
     static async init() {
@@ -16,18 +15,14 @@ export class HomePage {
         const initialHero = HeroService.getHeroData('home');
         Hero.mount('#hero-root', initialHero);
 
-        // 2. Renderizar dinamicamente o Painel 2 (Filtros da Home)
-        SubNavBar.mount('#subnav-root', { type: 'home', activeFilter: 'all' });
-
-        // 3. Renderizar dinamicamente a Vitrine de Produtos via ProductGrid.mount
+        // 2. Renderizar dinamicamente a Vitrine de Produtos via ProductGrid.mount
         this.initFeaturedProducts();
 
-        // 4. Inicializar filtros rápidos e formulário da newsletter
-        this.initCategoryFilters();
+        // 3. Inicializar formulário da newsletter e animações
         this.initNewsletterForm();
         initScrollAnimations();
 
-        // 5. Revalidar em tempo real direto da API MySQL
+        // 4. Revalidar em tempo real direto da API MySQL
         try {
             const [liveHeroes, liveProducts] = await Promise.allSettled([
                 ApiService.getHeroes(),
@@ -57,32 +52,6 @@ export class HomePage {
             title: 'Os Essenciais do Sol',
             description: 'Do biquíni esculpido à saída de banho em crochê manual — peças desenhadas para elevar a sua presença.',
             products: featured
-        });
-    }
-
-    /**
-     * Configura os botões de filtro rápido de categoria no Painel 2 da Home
-     */
-    static initCategoryFilters() {
-        const filterBtns = $$('[data-home-filter]');
-        if (!filterBtns.length) return;
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const filter = btn.getAttribute('data-home-filter') || 'all';
-
-                // Atualiza o estado visual das pills com função compartilhada
-                updatePillState(filterBtns, filter, 'data-home-filter');
-
-                // Filtra e atualiza os produtos via ProductGrid.updateCards
-                const allCurrent = ProductService.getAll();
-                const productsToDisplay = (filter === 'all' || filter === 'destaques')
-                    ? allCurrent.filter(p => p.featured || p.badge || p.price > 400).slice(0, 8)
-                    : allCurrent.filter(p => p.category === filter || p.category_id === filter);
-
-                ProductGrid.updateCards('#home-product-grid', productsToDisplay);
-            });
         });
     }
 
