@@ -7,14 +7,16 @@ import { ProductGrid } from '../components/ProductGrid.js';
 import { SubNavBar } from '../components/SubNavBar.js';
 import { Hero } from '../components/Hero.js';
 import { HeroService } from '../services/HeroService.js';
+import { ApiService } from '../services/ApiService.js';
 import { $$, updatePillState, showTemporaryFeedback, initScrollAnimations, $ } from '../utils/dom.js';
 
 export class HomePage {
-    static init() {
-        // 1. Renderizar dinamicamente o Hero da Home via Hero.mount
-        Hero.mount('#hero-root', HeroService.getHeroData('home'));
+    static async init() {
+        // 1. Renderizar imediatamente o Hero da Home
+        const initialHero = HeroService.getHeroData('home');
+        Hero.mount('#hero-root', initialHero);
 
-        // 2. Renderizar dinamicamente o Painel 2 (Filtros da Home) com sticky garantido
+        // 2. Renderizar dinamicamente o Painel 2 (Filtros da Home)
         SubNavBar.mount('#subnav-root', { type: 'home', activeFilter: 'all' });
 
         // 3. Renderizar dinamicamente a Vitrine de Produtos via ProductGrid.mount
@@ -24,6 +26,23 @@ export class HomePage {
         this.initCategoryFilters();
         this.initNewsletterForm();
         initScrollAnimations();
+
+        // 5. Revalidar em tempo real direto da API MySQL
+        try {
+            const [liveHeroes, liveProducts] = await Promise.allSettled([
+                ApiService.getHeroes(),
+                ApiService.getProducts()
+            ]);
+
+            if (liveHeroes.status === 'fulfilled' && liveHeroes.value && liveHeroes.value['home']) {
+                Hero.mount('#hero-root', liveHeroes.value['home']);
+            }
+
+            if (liveProducts.status === 'fulfilled' && Array.isArray(liveProducts.value) && liveProducts.value.length > 0) {
+                const liveFeatured = liveProducts.value.filter(p => p.featured || p.badge || p.price > 400).slice(0, 8);
+                ProductGrid.updateCards('#home-product-grid', liveFeatured);
+            }
+        } catch (e) {}
     }
 
     /**
@@ -57,9 +76,10 @@ export class HomePage {
                 updatePillState(filterBtns, filter, 'data-home-filter');
 
                 // Filtra e atualiza os produtos via ProductGrid.updateCards
+                const allCurrent = ProductService.getAll();
                 const productsToDisplay = (filter === 'all' || filter === 'destaques')
-                    ? ProductService.getFeatured()
-                    : ProductService.getByCategory(filter);
+                    ? allCurrent.filter(p => p.featured || p.badge || p.price > 400).slice(0, 8)
+                    : allCurrent.filter(p => p.category === filter || p.category_id === filter);
 
                 ProductGrid.updateCards('#home-product-grid', productsToDisplay);
             });

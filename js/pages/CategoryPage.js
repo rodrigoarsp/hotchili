@@ -8,14 +8,15 @@ import { ProductGrid } from '../components/ProductGrid.js';
 import { SubNavBar } from '../components/SubNavBar.js';
 import { Hero } from '../components/Hero.js';
 import { HeroService } from '../services/HeroService.js';
+import { ApiService } from '../services/ApiService.js';
 import { $, $$, updatePillState, smoothScrollTo } from '../utils/dom.js';
 import { getQueryParam, setQueryParam } from '../utils/url.js';
 
 export class CategoryPage {
-    static init(category = null) {
+    static async init(category = null) {
         const initialSub = getQueryParam('sub', 'all');
 
-        // 1. Renderizar dinamicamente a Hero Section via Hero.mount
+        // 1. Renderizar imediatamente a Hero Section via Hero.mount
         if (category) {
             const heroData = HeroService.getHeroData(category);
             if (heroData) {
@@ -23,7 +24,7 @@ export class CategoryPage {
             }
         }
 
-        // 2. Renderizar dinamicamente o Painel 2 (SubNavBar) com sticky garantido
+        // 2. Renderizar dinamicamente o Painel 2 (SubNavBar)
         if (category) {
             SubNavBar.mount('#subnav-root', {
                 type: 'category',
@@ -33,7 +34,7 @@ export class CategoryPage {
         }
 
         // 3. Montar a seção do grid de produtos
-        const allProducts = category ? ProductService.getByCategory(category) : ProductService.getAll();
+        let allProducts = category ? ProductService.getByCategory(category) : ProductService.getAll();
         const gridRoot = $('#product-grid-root');
         if (gridRoot) {
             ProductGrid.mount(gridRoot, {
@@ -59,73 +60,49 @@ export class CategoryPage {
 
             // Atualizar a URL
             if (updateUrl) {
-                setQueryParam('sub', targetSub, true);
+                setQueryParam('sub', targetSub);
             }
 
-            // Rolagem suave até a barra de produtos
+            // Scroll suave
             if (smoothScroll) {
-                const filterSection = $('[data-filter-sub]')?.closest('section');
-                if (filterSection) {
-                    smoothScrollTo(filterSection, 80);
-                }
+                smoothScrollTo('#vitrine-produtos', 120);
             }
         };
 
-        // Ouvinte de clique nos botões da barra de filtros (Painel 2)
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const subcategory = btn.getAttribute('data-filter-sub');
-                applyFilter(subcategory, true, false);
-            });
-        });
-
-        // Ouvinte global de cliques para capturar links do Header/Dropdown (Painel 1)
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('a');
-            if (!link) return;
-
-            const href = link.getAttribute('href');
-            if (!href) return;
-
-            try {
-                const currentFileName = window.location.pathname.split('/').pop() || 'index.html';
-                const isTargetingCurrentPage = href.startsWith(currentFileName) || 
-                                              href.startsWith('?') || 
-                                              (href.includes(currentFileName) && !href.startsWith('http'));
-
-                if (isTargetingCurrentPage && href.includes('sub=')) {
+        // 4. Registrar cliques nos botões de subcategoria do Painel 2
+        if (filterBtns.length) {
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const url = new URL(href, window.location.href);
-                    const subParam = url.searchParams.get('sub') || 'all';
+                    const subcategory = btn.getAttribute('data-filter-sub') || 'all';
+                    applyFilter(subcategory, true, false);
+                });
+            });
+        }
 
-                    applyFilter(subParam, true, true);
+        // 5. Aplicar filtro inicial da URL
+        if (initialSub && initialSub !== 'all') {
+            applyFilter(initialSub, false, false);
+        }
 
-                    // Fechar menu mobile se estiver aberto
-                    const mobileMenu = $('#mobile-menu');
-                    const backdrop = $('#mobile-menu-backdrop');
-                    if (mobileMenu && !mobileMenu.classList.contains('-translate-x-full')) {
-                        mobileMenu.classList.add('-translate-x-full', 'pointer-events-none');
-                        if (backdrop) backdrop.classList.add('opacity-0', 'pointer-events-none');
-                        document.body.classList.remove('overflow-hidden');
-                        setTimeout(() => {
-                            mobileMenu.classList.add('invisible');
-                            if (backdrop) backdrop.classList.add('invisible');
-                        }, 400);
-                    }
-                }
-            } catch (err) {
-                console.error('Erro ao processar navegação interna:', err);
+        // 6. Sincronizar em tempo real com a API MySQL
+        try {
+            const [liveHeroes, liveProducts] = await Promise.allSettled([
+                ApiService.getHeroes(),
+                ApiService.getProducts(category ? { category } : {})
+            ]);
+
+            if (category && liveHeroes.status === 'fulfilled' && liveHeroes.value && liveHeroes.value[category]) {
+                Hero.mount('#hero-root', liveHeroes.value[category]);
             }
-        });
 
-        // Ouvinte de navegação no histórico (Voltar/Avançar)
-        window.addEventListener('popstate', () => {
-            const subParam = getQueryParam('sub', 'all');
-            applyFilter(subParam, false, false);
-        });
+            if (liveProducts.status === 'fulfilled' && Array.isArray(liveProducts.value) && liveProducts.value.length > 0) {
+                allProducts = category 
+                    ? liveProducts.value.filter(p => p.category === category || p.category_id === category)
+                    : liveProducts.value;
 
-        // Inicialização: Ler parâmetro ?sub= da URL ao carregar a página
-        applyFilter(initialSub, false, false);
+                applyFilter(getQueryParam('sub', 'all'), false, false);
+            }
+        } catch (e) {}
     }
 }
