@@ -63,14 +63,11 @@
             background: #efbf62;
         }
     </style>
-    <!-- React & Babel Standalone para execução instantânea no navegador e compatibilidade cPanel -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body class="bg-surface text-on-surface antialiased selection:bg-primary selection:text-on-primary">
     <div id="root"></div>
 
-    <script type="text/babel" data-type="module" src="src/App.jsx"></script>
+    <!-- Aplicação Nativa ES Module Ultra-rápida (Compatibilidade Total com cPanel) -->
+    <script type="module" src="js/admin-app.js"></script>
 </body>
 </html>
