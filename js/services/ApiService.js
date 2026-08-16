@@ -411,4 +411,117 @@ export class ApiService {
 
         return { success: true, message: 'Senha do administrador alterada com sucesso!' };
     }
+
+    // ==========================================
+    // UPLOAD E OTIMIZAÇÃO DE IMAGENS
+    // ==========================================
+
+    static async uploadImage(fileOrBase64) {
+        // Se for string base64
+        if (typeof fileOrBase64 === 'string' && fileOrBase64.startsWith('data:image/')) {
+            try {
+                const res = await fetch(`${this.baseUrl}/upload.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_base64: fileOrBase64 })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.url) return data;
+                }
+            } catch (e) {}
+
+            // Fallback base64 local
+            return {
+                success: true,
+                url: fileOrBase64,
+                is_local_base64: true,
+                message: 'Imagem convertida localmente'
+            };
+        }
+
+        // Se for File object
+        if (fileOrBase64 instanceof File || fileOrBase64 instanceof Blob) {
+            try {
+                const formData = new FormData();
+                formData.append('image', fileOrBase64);
+                const res = await fetch(`${this.baseUrl}/upload.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.url) return data;
+                }
+            } catch (e) {}
+        }
+
+        throw new Error('Falha no upload da imagem.');
+    }
+
+    /**
+     * Redimensiona e recorta qualquer imagem no navegador via HTML5 Canvas
+     * Retorna Promise<string> base64 WebP/JPEG com peso ultra leve
+     */
+    static resizeImage(fileOrUrl, targetWidth = 800, targetHeight = 1000, quality = 0.88) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                const ctx = canvas.getContext('2d');
+
+                // Preencher fundo neutro escuro se houver transparência
+                ctx.fillStyle = '#17171a';
+                ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+                // Cálculo de proporção "cover" (crop centralizado elegante de moda)
+                const imgRatio = img.width / img.height;
+                const targetRatio = targetWidth / targetHeight;
+                let srcWidth, srcHeight, srcX, srcY;
+
+                if (imgRatio > targetRatio) {
+                    // Imagem original é mais larga
+                    srcHeight = img.height;
+                    srcWidth = img.height * targetRatio;
+                    srcX = (img.width - srcWidth) / 2;
+                    srcY = 0;
+                } else {
+                    // Imagem original é mais alta
+                    srcWidth = img.width;
+                    srcHeight = img.width / targetRatio;
+                    srcX = 0;
+                    srcY = (img.height - srcHeight) / 2;
+                }
+
+                ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, targetWidth, targetHeight);
+
+                // Tentar exportar em WebP com fallback para JPEG
+                try {
+                    const webpData = canvas.toDataURL('image/webp', quality);
+                    if (webpData.startsWith('data:image/webp')) {
+                        return resolve(webpData);
+                    }
+                } catch (e) {}
+
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+
+            img.onerror = (err) => reject(new Error('Não foi possível carregar a imagem para redimensionamento.'));
+
+            if (typeof fileOrUrl === 'string') {
+                img.src = fileOrUrl;
+            } else if (fileOrUrl instanceof File || fileOrUrl instanceof Blob) {
+                const reader = new FileReader();
+                reader.onload = (e) => { img.src = e.target.result; };
+                reader.onerror = reject;
+                reader.readAsDataURL(fileOrUrl);
+            } else {
+                reject(new Error('Formato inválido'));
+            }
+        });
+    }
 }

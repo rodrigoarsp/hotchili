@@ -1,7 +1,7 @@
 /**
  * admin-app.js
  * Aplicação Nativa do Painel CMS Headless Hot Chili.
- * Alta performance, sem dependência de compiladores no navegador, 100% compatível com cPanel/HostGator.
+ * Inclui Gestão de Mídia com Upload, Colagem de URL, Pré-visualização e Redimensionamento Inteligente.
  */
 import { ApiService } from '../../js/services/ApiService.js';
 
@@ -15,9 +15,16 @@ class AdminApp {
         this.settings = {};
         this.searchTerm = '';
         this.selectedCategory = 'all';
-        this.currentProduct = null;
-        this.currentHeroKey = 'home';
-        this.currentHero = null;
+
+        // Estado de Mídia no Modal de Produto
+        this.productMediaTab = 'upload'; // 'upload' | 'url'
+        this.productImagePreview = '';
+        this.productRawFile = null;
+
+        // Estado de Mídia no Modal de Hero
+        this.heroMediaTab = 'upload'; // 'upload' | 'url'
+        this.heroImagePreview = '';
+        this.heroRawFile = null;
 
         this.init();
     }
@@ -353,11 +360,11 @@ class AdminApp {
                         <table class="w-full text-left text-sm">
                             <thead>
                                 <tr class="border-b border-surface-border text-xs text-on-surface-muted uppercase">
-                                    <th className="pb-3">Pedido</th>
-                                    <th className="pb-3">Cliente</th>
-                                    <th className="pb-3">Valor</th>
-                                    <th className="pb-3">Pagamento</th>
-                                    <th className="pb-3">Status</th>
+                                    <th class="pb-3">Pedido</th>
+                                    <th class="pb-3">Cliente</th>
+                                    <th class="pb-3">Valor</th>
+                                    <th class="pb-3">Pagamento</th>
+                                    <th class="pb-3">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-surface-border">
@@ -365,7 +372,7 @@ class AdminApp {
                                     <tr class="hover:bg-surface-hover/50">
                                         <td class="py-3 font-semibold text-primary">${o.id}</td>
                                         <td class="py-3 text-on-surface">${o.customer_name}</td>
-                                        <td class="py-3 font-bold">R$ ${parseFloat(o.total).toFixed(2)}</td>
+                                        <td class="py-3 font-bold">R$ ${parseFloat(o.total || 0).toFixed(2)}</td>
                                         <td class="py-3 uppercase text-xs text-on-surface-muted">${o.payment_method}</td>
                                         <td class="py-3">
                                             <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -503,7 +510,7 @@ class AdminApp {
 
                                 <div class="mt-4 pt-4 border-t border-surface-border flex items-center justify-between">
                                     <span class="text-[11px] text-on-surface-muted truncate max-w-[200px]">
-                                        ${hero.imageUrl ? 'Com imagem de fundo' : 'Layout minimalista'}
+                                        ${hero.image_url || hero.imageUrl ? 'Com imagem de fundo' : 'Layout minimalista'}
                                     </span>
                                     <button data-edit-hero-key="${key}" class="flex items-center gap-1 text-xs font-bold text-primary hover:underline">
                                         <span class="material-symbols-outlined text-sm">edit_note</span>
@@ -628,6 +635,9 @@ class AdminApp {
         `;
     }
 
+    // ==========================================
+    // MODAL DE PRODUTO COM UPLOAD & REDIMENSIONAMENTO
+    // ==========================================
     renderProductModal() {
         return `
             <div id="product-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto hidden">
@@ -639,7 +649,7 @@ class AdminApp {
                         </button>
                     </div>
 
-                    <form id="save-product-form" class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                    <form id="save-product-form" class="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
                         <input type="hidden" id="modal-product-id" value=""/>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="sm:col-span-2">
@@ -673,9 +683,68 @@ class AdminApp {
                                 <input id="modal-product-badge" type="text" class="w-full px-4 py-2 bg-surface rounded-lg border border-surface-border text-sm text-on-surface focus:border-primary focus:outline-none" placeholder="Ex: Lançamento, Exclusivo"/>
                             </div>
 
-                            <div class="sm:col-span-2">
-                                <label class="block text-xs font-semibold text-on-surface mb-1">URL da Imagem Principal</label>
-                                <input required id="modal-product-image" type="url" class="w-full px-4 py-2 bg-surface rounded-lg border border-surface-border text-sm text-on-surface focus:border-primary focus:outline-none text-xs font-mono"/>
+                            <!-- SEÇÃO DE MÍDIA: UPLOAD E URL -->
+                            <div class="sm:col-span-2 p-4 bg-surface rounded-xl border border-surface-border space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-base">photo_library</span>
+                                        Foto da Peça (Mídia)
+                                    </span>
+
+                                    <!-- Alternador Upload / URL -->
+                                    <div class="flex bg-surface-card p-0.5 rounded-lg border border-surface-border">
+                                        <button type="button" id="prod-media-tab-upload-btn" class="px-3 py-1 rounded-md text-xs font-bold transition-all bg-primary text-on-primary">
+                                            Fazer Upload
+                                        </button>
+                                        <button type="button" id="prod-media-tab-url-btn" class="px-3 py-1 rounded-md text-xs font-medium text-on-surface-muted hover:text-on-surface transition-all">
+                                            Colar URL
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- PAINEL UPLOAD -->
+                                <div id="prod-upload-panel" class="space-y-3">
+                                    <div id="prod-dropzone" class="border-2 border-dashed border-primary/30 hover:border-primary/70 bg-surface-card/60 hover:bg-surface-card transition-all rounded-xl p-5 text-center cursor-pointer relative group">
+                                        <input type="file" id="prod-file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"/>
+                                        <div class="space-y-1">
+                                            <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-transform">cloud_upload</span>
+                                            <p class="text-xs font-bold text-on-surface">Clique para escolher a imagem ou arraste até aqui</p>
+                                            <p class="text-[11px] text-on-surface-muted">Suporta JPG, PNG, WEBP e GIF</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- SELETOR DE REDIMENSIONAMENTO / PRESETS -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-on-surface-muted mb-1">Ajuste de Proporção &amp; Tamanho</label>
+                                            <select id="prod-resize-preset" class="w-full px-3 py-1.5 bg-surface-card rounded-lg border border-surface-border text-xs text-on-surface focus:border-primary focus:outline-none">
+                                                <option value="fashion_portrait">Retrato de Moda (800 x 1000 px — Padrão)</option>
+                                                <option value="square">Quadrado (800 x 800 px)</option>
+                                                <option value="original">Original Otimizado (Máx 1200 px)</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex items-end">
+                                            <span class="text-[11px] text-on-surface-muted pb-1.5 block">
+                                                ✨ Otimização automática de nitidez e compressão WebP leve.
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PAINEL URL -->
+                                <div id="prod-url-panel" class="space-y-2 hidden">
+                                    <label class="block text-[11px] font-semibold text-on-surface-muted">Cole o link público da imagem</label>
+                                    <input id="modal-product-image" type="url" class="w-full px-4 py-2 bg-surface-card rounded-lg border border-surface-border text-xs text-on-surface focus:border-primary focus:outline-none font-mono" placeholder="https://exemplo.com/foto.jpg"/>
+                                </div>
+
+                                <!-- PREVIEW DA IMAGEM -->
+                                <div id="prod-image-preview-container" class="pt-2 flex items-center gap-4 bg-surface-card p-3 rounded-xl border border-surface-border/60">
+                                    <img id="prod-preview-img" src="https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw" class="w-16 h-20 object-cover rounded-lg border border-surface-border shadow-md" alt="Preview"/>
+                                    <div class="flex-1 min-w-0">
+                                        <span class="text-xs font-bold text-on-surface block truncate" id="prod-preview-name">Imagem Selecionada</span>
+                                        <span class="text-[11px] text-emerald-400 block font-mono" id="prod-preview-status">Pronta para publicação</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -683,7 +752,7 @@ class AdminApp {
                             <button type="button" id="cancel-product-modal-btn" class="px-5 py-2.5 rounded-lg border border-surface-border text-sm text-on-surface hover:bg-surface">
                                 Cancelar
                             </button>
-                            <button type="submit" class="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-on-primary font-bold text-sm shadow-md">
+                            <button type="submit" id="submit-product-modal-btn" class="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-on-primary font-bold text-sm shadow-md">
                                 Salvar Peça
                             </button>
                         </div>
@@ -693,6 +762,9 @@ class AdminApp {
         `;
     }
 
+    // ==========================================
+    // MODAL DE HERO COM UPLOAD & REDIMENSIONAMENTO
+    // ==========================================
     renderHeroModal() {
         return `
             <div id="hero-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
@@ -704,7 +776,7 @@ class AdminApp {
                         </button>
                     </div>
 
-                    <form id="save-hero-form" class="p-6 space-y-4">
+                    <form id="save-hero-form" class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
                         <div>
                             <label class="block text-xs font-semibold text-on-surface mb-1">Selo / Badge</label>
                             <input id="modal-hero-badge" type="text" class="w-full px-4 py-2 bg-surface rounded-lg border border-surface-border text-sm text-on-surface focus:border-primary focus:outline-none"/>
@@ -720,16 +792,53 @@ class AdminApp {
                             <textarea id="modal-hero-description" rows="3" class="w-full px-4 py-2 bg-surface rounded-lg border border-surface-border text-sm text-on-surface focus:border-primary focus:outline-none"></textarea>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-on-surface mb-1">URL da Imagem de Fundo</label>
-                            <input id="modal-hero-image" type="url" class="w-full px-4 py-2 bg-surface rounded-lg border border-surface-border text-sm text-on-surface focus:border-primary focus:outline-none text-xs font-mono"/>
+                        <!-- GESTÃO DE MÍDIA HERO -->
+                        <div class="p-4 bg-surface rounded-xl border border-surface-border space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-base">panorama</span>
+                                    Imagem de Fundo (Banner)
+                                </span>
+
+                                <div class="flex bg-surface-card p-0.5 rounded-lg border border-surface-border">
+                                    <button type="button" id="hero-media-tab-upload-btn" class="px-3 py-1 rounded-md text-xs font-bold transition-all bg-primary text-on-primary">
+                                        Upload
+                                    </button>
+                                    <button type="button" id="hero-media-tab-url-btn" class="px-3 py-1 rounded-md text-xs font-medium text-on-surface-muted hover:text-on-surface transition-all">
+                                        URL
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="hero-upload-panel" class="space-y-2">
+                                <div id="hero-dropzone" class="border-2 border-dashed border-primary/30 hover:border-primary/70 bg-surface-card/60 hover:bg-surface-card transition-all rounded-xl p-4 text-center cursor-pointer relative group">
+                                    <input type="file" id="hero-file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"/>
+                                    <div class="space-y-1">
+                                        <span class="material-symbols-outlined text-2xl text-primary group-hover:scale-110 transition-transform">add_photo_alternate</span>
+                                        <p class="text-xs font-bold text-on-surface">Enviar foto panorâmica do computador</p>
+                                        <p class="text-[10px] text-on-surface-muted">Redimensionamento automático para Banner Ultra HD (1920x800)</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="hero-url-panel" class="space-y-2 hidden">
+                                <input id="modal-hero-image" type="url" class="w-full px-4 py-2 bg-surface-card rounded-lg border border-surface-border text-xs text-on-surface focus:border-primary focus:outline-none font-mono" placeholder="https://exemplo.com/banner.jpg"/>
+                            </div>
+
+                            <div id="hero-image-preview-container" class="pt-2 flex items-center gap-4 bg-surface-card p-3 rounded-xl border border-surface-border/60">
+                                <img id="hero-preview-img" src="" class="w-24 h-14 object-cover rounded-lg border border-surface-border shadow-md" alt="Preview"/>
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-xs font-bold text-on-surface block truncate" id="hero-preview-name">Banner Atual</span>
+                                    <span class="text-[11px] text-emerald-400 block font-mono">Pronto</span>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="pt-4 border-t border-surface-border flex justify-end gap-3">
                             <button type="button" id="cancel-hero-modal-btn" class="px-5 py-2.5 rounded-lg border border-surface-border text-sm text-on-surface hover:bg-surface">
                                 Cancelar
                             </button>
-                            <button type="submit" class="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-on-primary font-bold text-sm shadow-md">
+                            <button type="submit" id="submit-hero-modal-btn" class="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-on-primary font-bold text-sm shadow-md">
                                 Salvar Alterações
                             </button>
                         </div>
@@ -813,20 +922,120 @@ class AdminApp {
             });
         });
 
-        // Salvar Produto Form
+        // ==========================================
+        // EVENTOS DE MÍDIA / UPLOAD / REDIMENSIONAMENTO (PRODUTO)
+        // ==========================================
+        const prodTabUploadBtn = document.getElementById('prod-media-tab-upload-btn');
+        const prodTabUrlBtn = document.getElementById('prod-media-tab-url-btn');
+        const prodUploadPanel = document.getElementById('prod-upload-panel');
+        const prodUrlPanel = document.getElementById('prod-url-panel');
+        const prodFileInput = document.getElementById('prod-file-input');
+        const prodUrlInput = document.getElementById('modal-product-image');
+        const prodPreviewImg = document.getElementById('prod-preview-img');
+        const prodPreviewName = document.getElementById('prod-preview-name');
+        const prodPreviewStatus = document.getElementById('prod-preview-status');
+        const prodResizePreset = document.getElementById('prod-resize-preset');
+
+        if (prodTabUploadBtn && prodTabUrlBtn) {
+            prodTabUploadBtn.addEventListener('click', () => {
+                prodTabUploadBtn.className = 'px-3 py-1 rounded-md text-xs font-bold transition-all bg-primary text-on-primary';
+                prodTabUrlBtn.className = 'px-3 py-1 rounded-md text-xs font-medium text-on-surface-muted hover:text-on-surface transition-all';
+                prodUploadPanel.classList.remove('hidden');
+                prodUrlPanel.classList.add('hidden');
+                this.productMediaTab = 'upload';
+            });
+
+            prodTabUrlBtn.addEventListener('click', () => {
+                prodTabUrlBtn.className = 'px-3 py-1 rounded-md text-xs font-bold transition-all bg-primary text-on-primary';
+                prodTabUploadBtn.className = 'px-3 py-1 rounded-md text-xs font-medium text-on-surface-muted hover:text-on-surface transition-all';
+                prodUrlPanel.classList.remove('hidden');
+                prodUploadPanel.classList.add('hidden');
+                this.productMediaTab = 'url';
+            });
+        }
+
+        if (prodUrlInput) {
+            prodUrlInput.addEventListener('input', (e) => {
+                const url = e.target.value.trim();
+                if (url) {
+                    prodPreviewImg.src = url;
+                    prodPreviewName.textContent = 'Imagem via URL';
+                    prodPreviewStatus.textContent = 'Link configurado';
+                    this.productImagePreview = url;
+                    this.productRawFile = null;
+                }
+            });
+        }
+
+        const handleProductFile = async (file) => {
+            if (!file) return;
+            prodPreviewStatus.textContent = 'Redimensionando e otimizando...';
+            prodPreviewName.textContent = file.name;
+
+            let targetW = 800, targetH = 1000;
+            const preset = prodResizePreset?.value || 'fashion_portrait';
+            if (preset === 'square') { targetW = 800; targetH = 800; }
+            if (preset === 'original') { targetW = 1200; targetH = 1200; }
+
+            try {
+                const optimizedBase64 = await ApiService.resizeImage(file, targetW, targetH, 0.88);
+                prodPreviewImg.src = optimizedBase64;
+                prodUrlInput.value = optimizedBase64; // Salva o base64 temporário
+                this.productImagePreview = optimizedBase64;
+                this.productRawFile = optimizedBase64;
+                prodPreviewStatus.textContent = `Otimizado para ${targetW}x${targetH} px`;
+            } catch (err) {
+                prodPreviewStatus.textContent = 'Erro ao processar imagem';
+            }
+        };
+
+        if (prodFileInput) {
+            prodFileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleProductFile(e.target.files[0]);
+                }
+            });
+        }
+
+        if (prodResizePreset) {
+            prodResizePreset.addEventListener('change', () => {
+                if (prodFileInput?.files?.[0]) {
+                    handleProductFile(prodFileInput.files[0]);
+                }
+            });
+        }
+
+        // Salvar Produto Form Submit
         document.getElementById('save-product-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitBtn = document.getElementById('submit-product-modal-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span>Salvando...</span>`;
+
             const id = document.getElementById('modal-product-id')?.value;
             const price = parseFloat(document.getElementById('modal-product-price')?.value) || 0;
+            let finalImage = document.getElementById('modal-product-image')?.value || this.productImagePreview;
+
+            // Se for base64 recortado, faz o upload para o servidor para gerar URL permanente na pasta /uploads/
+            if (finalImage && finalImage.startsWith('data:image/')) {
+                try {
+                    const uploadRes = await ApiService.uploadImage(finalImage);
+                    if (uploadRes && uploadRes.url) {
+                        finalImage = uploadRes.url;
+                    }
+                } catch (err) {}
+            }
+
             const prodData = {
                 id: id || undefined,
                 name: document.getElementById('modal-product-name')?.value,
                 category: document.getElementById('modal-product-category')?.value,
+                category_id: document.getElementById('modal-product-category')?.value,
                 price: price,
                 formattedPrice: `R$ ${price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                 color: document.getElementById('modal-product-color')?.value,
                 badge: document.getElementById('modal-product-badge')?.value,
-                image: document.getElementById('modal-product-image')?.value,
+                image: finalImage,
                 featured: true
             };
 
@@ -834,11 +1043,68 @@ class AdminApp {
             await this.loadData();
             this.closeProductModal();
             this.render();
-            this.showToast(id ? 'Produto atualizado com sucesso!' : 'Novo produto criado com sucesso!');
+            this.showToast(id ? 'Peça atualizada com sucesso!' : 'Nova peça cadastrada com sucesso!');
         });
 
         document.getElementById('close-product-modal-btn')?.addEventListener('click', () => this.closeProductModal());
         document.getElementById('cancel-product-modal-btn')?.addEventListener('click', () => this.closeProductModal());
+
+        // ==========================================
+        // EVENTOS DE MÍDIA / UPLOAD / REDIMENSIONAMENTO (HERO)
+        // ==========================================
+        const heroTabUploadBtn = document.getElementById('hero-media-tab-upload-btn');
+        const heroTabUrlBtn = document.getElementById('hero-media-tab-url-btn');
+        const heroUploadPanel = document.getElementById('hero-upload-panel');
+        const heroUrlPanel = document.getElementById('hero-url-panel');
+        const heroFileInput = document.getElementById('hero-file-input');
+        const heroUrlInput = document.getElementById('modal-hero-image');
+        const heroPreviewImg = document.getElementById('hero-preview-img');
+        const heroPreviewName = document.getElementById('hero-preview-name');
+
+        if (heroTabUploadBtn && heroTabUrlBtn) {
+            heroTabUploadBtn.addEventListener('click', () => {
+                heroTabUploadBtn.className = 'px-3 py-1 rounded-md text-xs font-bold transition-all bg-primary text-on-primary';
+                heroTabUrlBtn.className = 'px-3 py-1 rounded-md text-xs font-medium text-on-surface-muted hover:text-on-surface transition-all';
+                heroUploadPanel.classList.remove('hidden');
+                heroUrlPanel.classList.add('hidden');
+            });
+
+            heroTabUrlBtn.addEventListener('click', () => {
+                heroTabUrlBtn.className = 'px-3 py-1 rounded-md text-xs font-bold transition-all bg-primary text-on-primary';
+                heroTabUploadBtn.className = 'px-3 py-1 rounded-md text-xs font-medium text-on-surface-muted hover:text-on-surface transition-all';
+                heroUrlPanel.classList.remove('hidden');
+                heroUploadPanel.classList.add('hidden');
+            });
+        }
+
+        if (heroUrlInput) {
+            heroUrlInput.addEventListener('input', (e) => {
+                const url = e.target.value.trim();
+                if (url) {
+                    heroPreviewImg.src = url;
+                    heroPreviewName.textContent = 'Banner via URL';
+                    this.heroImagePreview = url;
+                }
+            });
+        }
+
+        if (heroFileInput) {
+            heroFileInput.addEventListener('change', async (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    heroPreviewName.textContent = 'Processando Banner Ultra HD...';
+                    try {
+                        const optimizedBanner = await ApiService.resizeImage(file, 1920, 800, 0.85);
+                        heroPreviewImg.src = optimizedBanner;
+                        heroUrlInput.value = optimizedBanner;
+                        this.heroImagePreview = optimizedBanner;
+                        heroPreviewName.textContent = 'Banner 1920x800 px pronto';
+                    } catch (err) {
+                        heroPreviewName.textContent = 'Erro ao processar imagem';
+                    }
+                }
+            });
+        }
 
         // Editar Hero Modal
         document.querySelectorAll('[data-edit-hero-key]').forEach(btn => {
@@ -850,11 +1116,27 @@ class AdminApp {
 
         document.getElementById('save-hero-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitBtn = document.getElementById('submit-hero-modal-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span>Salvando...</span>`;
+
+            let finalHeroImage = document.getElementById('modal-hero-image')?.value || this.heroImagePreview;
+
+            if (finalHeroImage && finalHeroImage.startsWith('data:image/')) {
+                try {
+                    const uploadRes = await ApiService.uploadImage(finalHeroImage);
+                    if (uploadRes && uploadRes.url) {
+                        finalHeroImage = uploadRes.url;
+                    }
+                } catch (err) {}
+            }
+
             const heroData = {
                 badge: document.getElementById('modal-hero-badge')?.value,
                 title: document.getElementById('modal-hero-title')?.value,
                 description: document.getElementById('modal-hero-description')?.value,
-                imageUrl: document.getElementById('modal-hero-image')?.value
+                imageUrl: finalHeroImage,
+                image_url: finalHeroImage
             };
 
             await ApiService.saveHero(this.currentHeroKey, heroData);
@@ -912,7 +1194,12 @@ class AdminApp {
         document.getElementById('modal-product-price').value = prod ? prod.price : '';
         document.getElementById('modal-product-color').value = prod ? (prod.color || 'Ouro Nobre') : 'Ouro Nobre';
         document.getElementById('modal-product-badge').value = prod ? (prod.badge || '') : 'Novo';
-        document.getElementById('modal-product-image').value = prod ? prod.image : 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
+        
+        const initialImg = prod ? prod.image : 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
+        document.getElementById('modal-product-image').value = initialImg;
+        document.getElementById('prod-preview-img').src = initialImg;
+        document.getElementById('prod-preview-name').textContent = prod ? prod.name : 'Imagem Padrão';
+        this.productImagePreview = initialImg;
 
         if (title) title.textContent = prod ? 'Editar Peça de Luxo' : 'Cadastrar Nova Peça';
         modal.classList.remove('hidden');
@@ -933,7 +1220,11 @@ class AdminApp {
         document.getElementById('modal-hero-badge').value = hero.badge || '';
         document.getElementById('modal-hero-title').value = hero.title || '';
         document.getElementById('modal-hero-description').value = hero.description || '';
-        document.getElementById('modal-hero-image').value = hero.imageUrl || '';
+        
+        const heroImg = hero.image_url || hero.imageUrl || '';
+        document.getElementById('modal-hero-image').value = heroImg;
+        document.getElementById('hero-preview-img').src = heroImg || 'https://lh3.googleusercontent.com/aida-public/AB6AXuChO5ac7GM05feevK3AKK8ckQsGI8zyLHcWYSqe_79EJZdlx2wmGqC0y2R5n77qB43BCg8ZaumkWAFY-A4K0FwYdpstPtOZjV46hdS0LsCEGjlhKsFbZNKQ2ARh25p94SEXswwCKW0I-4HmyMCeafYQNTl4ip2xdVkoCVGNnv_P04FItAfYej34n9I4C63sDpmC_8_psqPCjX9kK4BnHkcrXq_i7I7Dx437I6J2xxT6FgW-6WFy652D';
+        this.heroImagePreview = heroImg;
 
         if (title) title.textContent = `Editar Hero: ${key.toUpperCase()}`;
         modal.classList.remove('hidden');
