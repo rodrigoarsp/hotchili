@@ -16,7 +16,18 @@ const STORAGE_KEYS = {
 };
 
 export class ApiService {
-    static baseUrl = '/api';
+    /**
+     * Resolve a URL base da API dinamicamente
+     */
+    static get baseUrl() {
+        const path = window.location.pathname;
+        if (path.includes('/admin')) {
+            const rootPath = path.substring(0, path.lastIndexOf('/admin'));
+            return (rootPath ? rootPath : '') + '/api';
+        }
+        const dir = path.substring(0, path.lastIndexOf('/'));
+        return (dir && dir !== '/' ? dir : '') + '/api';
+    }
 
     /**
      * Inicializa a Store com os dados padrão caso esteja vazia
@@ -37,7 +48,8 @@ export class ApiService {
                 mercadopago_public_key: 'TEST-00000000-0000-0000-0000-000000000000',
                 mercadopago_access_token: 'TEST-0000000000000000-000000-00000000000000000000000000000000-000000000',
                 correios_origin_cep: '01001000',
-                free_shipping_threshold: 600.00
+                free_shipping_threshold: 600.00,
+                admin_password: 'hotchili2026'
             };
             localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(initialSettings));
         }
@@ -86,7 +98,9 @@ export class ApiService {
             const res = await fetch(`${this.baseUrl}/products.php?${query}`);
             if (res.ok) {
                 const data = await res.json();
-                if (data.success && Array.isArray(data.products)) {
+                if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+                    // Atualiza cache local com o banco de dados MySQL
+                    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(data.products));
                     return data.products;
                 }
             }
@@ -106,6 +120,14 @@ export class ApiService {
 
     static async getProductById(id) {
         this.initStore();
+        try {
+            const res = await fetch(`${this.baseUrl}/products.php?id=${id}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.product) return data.product;
+            }
+        } catch (e) {}
+
         const products = await this.getProducts();
         return products.find(p => p.id === id) || null;
     }
@@ -114,27 +136,30 @@ export class ApiService {
         this.initStore();
         let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
         
-        if (productData.id && products.some(p => p.id === productData.id)) {
-            // Atualizar
-            products = products.map(p => p.id === productData.id ? { ...p, ...productData, updated_at: new Date().toISOString() } : p);
+        const isEdit = productData.id && products.some(p => p.id === productData.id);
+        const finalId = productData.id || ('hc-' + Math.random().toString(36).substr(2, 6));
+        const finalProduct = {
+            ...productData,
+            id: finalId,
+            updated_at: new Date().toISOString()
+        };
+
+        if (isEdit) {
+            products = products.map(p => p.id === finalId ? finalProduct : p);
         } else {
-            // Criar
-            const newProduct = {
-                ...productData,
-                id: productData.id || ('hc-' + Math.random().toString(36).substr(2, 6)),
-                created_at: new Date().toISOString()
-            };
-            products.unshift(newProduct);
+            products.unshift(finalProduct);
         }
 
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
 
-        // Tentar sincronizar com backend se online
+        // Tentar salvar no MySQL via API PHP
         try {
-            await fetch(`${this.baseUrl}/products.php`, {
-                method: 'POST',
+            const url = isEdit ? `${this.baseUrl}/products.php?id=${finalId}` : `${this.baseUrl}/products.php`;
+            const method = isEdit ? 'PUT' : 'POST';
+            await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productData)
+                body: JSON.stringify(finalProduct)
             });
         } catch (e) {}
 
@@ -160,6 +185,17 @@ export class ApiService {
 
     static async getHeroes() {
         this.initStore();
+        try {
+            const res = await fetch(`${this.baseUrl}/heroes.php`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.heroes && Object.keys(data.heroes).length > 0) {
+                    localStorage.setItem(STORAGE_KEYS.HEROES, JSON.stringify(data.heroes));
+                    return data.heroes;
+                }
+            }
+        } catch (e) {}
+
         return JSON.parse(localStorage.getItem(STORAGE_KEYS.HEROES) || '{}');
     }
 

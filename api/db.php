@@ -4,6 +4,9 @@
  * Conexão com o Banco de Dados MySQL / MariaDB via PDO (Compatível com cPanel HostGator).
  */
 
+error_reporting(0);
+ini_set('display_errors', 0);
+
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');

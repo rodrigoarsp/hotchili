@@ -1,10 +1,7 @@
 -- =========================================================
 -- BANCO DE DADOS: rod38226_hotchili_db
--- Compatível com MySQL 5.7+ / MariaDB 10.3+ (HostGator cPanel)
+-- Compatível com MySQL 5.7+ / MariaDB 10.3+ (HostGator cPanel phpMyAdmin)
 -- =========================================================
-
-CREATE DATABASE IF NOT EXISTS `rod38226_hotchili_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `rod38226_hotchili_db`;
 
 -- ---------------------------------------------------------
 -- 1. TABELA DE CATEGORIAS

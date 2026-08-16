@@ -12,11 +12,20 @@ import { ProductPage } from './pages/ProductPage.js';
 import { CheckoutPage } from './pages/CheckoutPage.js';
 import { CarePage } from './pages/CarePage.js';
 import { SizeGuidePage } from './pages/SizeGuidePage.js';
+import { ApiService } from './services/ApiService.js';
 import { getPageId } from './utils/url.js';
 import { initScrollAnimations } from './utils/dom.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const pageId = getPageId();
+
+    // 0. Sincronizar dados em background com o MySQL / API Headless
+    try {
+        await Promise.allSettled([
+            ApiService.getProducts(),
+            ApiService.getHeroes()
+        ]);
+    } catch (e) {}
 
     // 1. Renderizar Header Global (exceto no Checkout minimalista)
     const headerRoot = document.getElementById('header-root');
