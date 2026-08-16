@@ -3,7 +3,7 @@
  * Aplicação Nativa do Painel CMS Headless Hot Chili.
  * Inclui Gestão de Mídia com Upload, Colagem de URL, Pré-visualização e Redimensionamento Inteligente.
  */
-import { ApiService } from '../../js/services/ApiService.js';
+import { ApiService } from '../../js/services/ApiService.js?v=2.6.0';
 
 class AdminApp {
     constructor() {
