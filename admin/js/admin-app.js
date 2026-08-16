@@ -1,10 +1,10 @@
 /**
  * admin-app.js
  * Aplicação Nativa do Painel CMS Headless Hot Chili.
- * Inclui Gestão de Mídia com Upload, Enquadrador Interativo (Pan/Drag & Zoom),
+ * Inclui Gestão de Mídia Multi-Fotos (+ Adicionar Várias Fotos), Enquadrador Interativo (Pan/Drag & Zoom),
  * e Gerador de Etiquetas de Envio Oficiais dos Correios (SEDEX / PAC) prontas para impressão.
  */
-import { ApiService } from '../../js/services/ApiService.js?v=2.9.0';
+import { ApiService } from '../../js/services/ApiService.js?v=3.0.0';
 
 class AdminApp {
     constructor() {
@@ -16,6 +16,10 @@ class AdminApp {
         this.settings = {};
         this.searchTerm = '';
         this.selectedCategory = 'all';
+
+        // Galeria Multi-Fotos do Produto
+        this.productGallery = [];
+        this.activeGalleryIdx = 0;
 
         // Estado do Enquadrador de Produto (Interactive Cropper)
         this.prodCrop = {
@@ -699,7 +703,7 @@ class AdminApp {
     }
 
     // ==========================================
-    // MODAL DE PRODUTO
+    // MODAL DE PRODUTO COM MULTI-FOTOS (+)
     // ==========================================
     renderProductModal() {
         return `
@@ -746,22 +750,30 @@ class AdminApp {
                                 <input id="modal-product-badge" type="text" class="w-full px-4 py-2 bg-surface rounded-lg border border-surface-border text-sm text-on-surface focus:border-primary focus:outline-none" placeholder="Ex: Lançamento, Exclusivo"/>
                             </div>
 
-                            <!-- SEÇÃO DE MÍDIA INTERATIVA COM ENQUADRADOR -->
+                            <!-- SEÇÃO DE MÍDIA MULTI-FOTOS (+) E ENQUADRADOR -->
                             <div class="sm:col-span-2 p-4 bg-surface rounded-xl border border-surface-border space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-base">photo_library</span>
-                                        Foto da Peça &amp; Enquadramento
-                                    </span>
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <span class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-base">photo_library</span>
+                                            Galeria de Fotos da Peça
+                                        </span>
+                                        <span class="text-[11px] text-on-surface-muted block">Clique no botão (+) para acrescentar mais fotos do mesmo produto</span>
+                                    </div>
 
                                     <div class="flex bg-surface-card p-0.5 rounded-lg border border-surface-border">
                                         <button type="button" id="prod-media-tab-upload-btn" class="px-3 py-1 rounded-md text-xs font-bold transition-all bg-primary text-on-primary">
-                                            Fazer Upload
+                                            Upload
                                         </button>
                                         <button type="button" id="prod-media-tab-url-btn" class="px-3 py-1 rounded-md text-xs font-medium text-on-surface-muted hover:text-on-surface transition-all">
-                                            Colar URL
+                                            URL
                                         </button>
                                     </div>
+                                </div>
+
+                                <!-- LISTAGEM DE MINIATURAS DA GALERIA COM BOTÃO (+) -->
+                                <div id="prod-gallery-thumbs-container" class="flex items-center gap-2.5 overflow-x-auto py-2 border-y border-surface-border/50">
+                                    <!-- Renderizado dinamicamente via renderGalleryThumbnails() -->
                                 </div>
 
                                 <div id="prod-upload-panel" class="space-y-3">
@@ -769,28 +781,29 @@ class AdminApp {
                                         <input type="file" id="prod-file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"/>
                                         <div class="space-y-1">
                                             <span class="material-symbols-outlined text-2xl text-primary group-hover:scale-110 transition-transform">cloud_upload</span>
-                                            <p class="text-xs font-bold text-on-surface">Clique para escolher a imagem ou arraste até aqui</p>
-                                            <p class="text-[10px] text-on-surface-muted">Suporta JPG, PNG, WEBP e GIF</p>
+                                            <p class="text-xs font-bold text-on-surface">Clique para escolher imagem ou arraste até aqui</p>
+                                            <p class="text-[10px] text-on-surface-muted">A foto selecionada será adicionada à galeria</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div id="prod-url-panel" class="space-y-2 hidden">
-                                    <label class="block text-[11px] font-semibold text-on-surface-muted">Cole o link da imagem</label>
+                                    <label class="block text-[11px] font-semibold text-on-surface-muted">Cole o link da imagem para adicionar à galeria</label>
                                     <div class="flex gap-2">
                                         <input id="modal-product-image" type="url" class="flex-1 px-4 py-2 bg-surface-card rounded-lg border border-surface-border text-xs text-on-surface focus:border-primary focus:outline-none font-mono" placeholder="https://exemplo.com/foto.jpg"/>
-                                        <button type="button" id="prod-load-url-btn" class="px-4 py-2 bg-surface-card hover:bg-surface border border-surface-border text-xs text-primary font-bold rounded-lg transition-colors">
-                                            Carregar
+                                        <button type="button" id="prod-load-url-btn" class="px-4 py-2 bg-surface-card hover:bg-surface border border-surface-border text-xs text-primary font-bold rounded-lg transition-colors flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-sm">add</span>
+                                            Adicionar
                                         </button>
                                     </div>
                                 </div>
 
-                                <!-- FERRAMENTA DE ENQUADRAMENTO INTERATIVO -->
+                                <!-- FERRAMENTA DE ENQUADRAMENTO DA FOTO SELECIONADA -->
                                 <div id="prod-cropper-section" class="p-4 bg-surface-card rounded-xl border border-primary/30 space-y-3">
                                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-surface-border pb-2">
                                         <div>
-                                            <span class="text-xs font-bold text-on-surface block">Arraste a foto para posicionar</span>
-                                            <span class="text-[10px] text-on-surface-muted">Clique e mova a imagem com o mouse para enquadrar perfeitamente</span>
+                                            <span class="text-xs font-bold text-on-surface block" id="cropper-photo-title">Enquadramento da Foto Selecionada</span>
+                                            <span class="text-[10px] text-on-surface-muted">Arraste a imagem no visor para posicionar onde preferir</span>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <select id="prod-cropper-preset" class="px-2.5 py-1 bg-surface rounded-lg border border-surface-border text-xs text-on-surface focus:border-primary focus:outline-none">
@@ -843,6 +856,84 @@ class AdminApp {
                 </div>
             </div>
         `;
+    }
+
+    renderGalleryThumbnails() {
+        const container = document.getElementById('prod-gallery-thumbs-container');
+        if (!container) return;
+
+        const thumbsHtml = this.productGallery.map((img, idx) => `
+            <div class="relative group w-16 h-20 rounded-lg border-2 ${this.activeGalleryIdx === idx ? 'border-primary ring-2 ring-primary/40' : 'border-surface-border'} overflow-hidden cursor-pointer flex-shrink-0 bg-surface shadow-xs transition-all" data-select-gallery-idx="${idx}">
+                <img src="${this.formatImg(img)}" onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';" class="w-full h-full object-cover"/>
+                ${idx === 0 ? '<span class="absolute bottom-0 inset-x-0 bg-primary/95 text-on-primary text-[8px] font-bold text-center uppercase py-0.5 pointer-events-none">Capa</span>' : ''}
+                ${this.productGallery.length > 1 ? `
+                    <button type="button" class="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/80 hover:bg-rose-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10" data-remove-gallery-idx="${idx}" title="Remover Foto">
+                        <span class="material-symbols-outlined text-[10px]">close</span>
+                    </button>
+                ` : ''}
+            </div>
+        `).join('');
+
+        const addBtnHtml = `
+            <button type="button" id="prod-add-photo-btn" class="w-16 h-20 rounded-lg border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/10 flex flex-col items-center justify-center text-primary gap-1 flex-shrink-0 transition-all cursor-pointer group bg-surface-card" title="Adicionar outra foto à galeria">
+                <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">add_circle</span>
+                <span class="text-[9px] font-bold uppercase text-center leading-none">Mais Foto</span>
+            </button>
+        `;
+
+        container.innerHTML = thumbsHtml + addBtnHtml;
+
+        // Eventos das Miniaturas
+        container.querySelectorAll('[data-select-gallery-idx]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('[data-remove-gallery-idx]')) return;
+                const idx = parseInt(el.getAttribute('data-select-gallery-idx'));
+                this.selectGalleryPhoto(idx);
+            });
+        });
+
+        container.querySelectorAll('[data-remove-gallery-idx]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.getAttribute('data-remove-gallery-idx'));
+                this.removeGalleryPhoto(idx);
+            });
+        });
+
+        document.getElementById('prod-add-photo-btn')?.addEventListener('click', () => {
+            const fileInput = document.getElementById('prod-file-input');
+            if (fileInput) fileInput.click();
+        });
+
+        const titleEl = document.getElementById('cropper-photo-title');
+        if (titleEl) {
+            titleEl.textContent = `Enquadramento da Foto ${this.activeGalleryIdx + 1} de ${this.productGallery.length} ${this.activeGalleryIdx === 0 ? '(Foto de Capa)' : ''}`;
+        }
+    }
+
+    selectGalleryPhoto(idx) {
+        if (idx < 0 || idx >= this.productGallery.length) return;
+        this.activeGalleryIdx = idx;
+        this.renderGalleryThumbnails();
+        this.loadProductImageToCropper(this.productGallery[idx]);
+    }
+
+    removeGalleryPhoto(idx) {
+        if (this.productGallery.length <= 1) return;
+        this.productGallery.splice(idx, 1);
+        if (this.activeGalleryIdx >= this.productGallery.length) {
+            this.activeGalleryIdx = this.productGallery.length - 1;
+        }
+        this.renderGalleryThumbnails();
+        this.loadProductImageToCropper(this.productGallery[this.activeGalleryIdx]);
+    }
+
+    addGalleryPhoto(newImageSrc) {
+        if (!newImageSrc) return;
+        this.productGallery.push(newImageSrc);
+        this.activeGalleryIdx = this.productGallery.length - 1;
+        this.renderGalleryThumbnails();
+        this.loadProductImageToCropper(newImageSrc);
     }
 
     // ==========================================
@@ -952,7 +1043,7 @@ class AdminApp {
     }
 
     // ==========================================
-    // MODAL DE ETIQUETA DOS CORREIOS (OFICIAL / IMPRESSÃO)
+    // MODAL DE ETIQUETA DOS CORREIOS
     // ==========================================
     renderShippingLabelModal() {
         return `
@@ -974,11 +1065,9 @@ class AdminApp {
                         </div>
                     </div>
 
-                    <!-- CONTAINER IMPRIMÍVEL (PADRÃO CORREIOS BRASIL 10x15 CM) -->
                     <div class="p-6 bg-surface overflow-y-auto max-h-[75vh] flex justify-center">
                         <div id="shipping-label-printable" class="bg-white text-black p-6 rounded-lg border-2 border-dashed border-gray-400 w-full max-w-[440px] font-sans text-xs shadow-lg space-y-4">
                             
-                            <!-- CABEÇALHO CORREIOS -->
                             <div class="border-b-2 border-black pb-3 flex items-center justify-between">
                                 <div>
                                     <span class="font-extrabold text-lg tracking-wider block">CORREIOS</span>
@@ -989,7 +1078,6 @@ class AdminApp {
                                 </div>
                             </div>
 
-                            <!-- CÓDIGO DE RASTREAMENTO & CÓDIGO DE BARRAS -->
                             <div class="text-center py-1 space-y-1">
                                 <div class="font-mono font-bold text-sm tracking-widest" id="lbl-tracking-code">NL123456789BR</div>
                                 <div class="flex justify-center py-1">
@@ -998,7 +1086,6 @@ class AdminApp {
                                 </div>
                             </div>
 
-                            <!-- DESTINATÁRIO -->
                             <div class="border-2 border-black p-3 rounded space-y-1">
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider block text-gray-600">DESTINATÁRIO:</span>
                                 <div class="font-bold text-sm uppercase" id="lbl-dest-name">Fernanda Silveira</div>
@@ -1014,7 +1101,6 @@ class AdminApp {
                                 </div>
                             </div>
 
-                            <!-- REMETENTE -->
                             <div class="border-t border-gray-300 pt-3 text-[11px] space-y-0.5">
                                 <span class="font-bold text-[10px] uppercase text-gray-600 block">REMETENTE:</span>
                                 <div class="font-bold uppercase">HOT CHILI LUXURY BEACHWEAR LTDA</div>
@@ -1023,7 +1109,6 @@ class AdminApp {
                                 <div class="text-[10px] text-gray-500">CNPJ: 48.123.456/0001-89 &bull; (11) 99999-9999</div>
                             </div>
 
-                            <!-- DECLARAÇÃO DE CONTEÚDO RESUMIDA -->
                             <div class="border-t border-dashed border-gray-400 pt-2 text-[10px] text-gray-600 space-y-1">
                                 <div class="flex justify-between font-bold">
                                     <span>Conteúdo: Peças Moda Praia / Resort</span>
@@ -1087,6 +1172,11 @@ class AdminApp {
                 this.productImageResult = canvas.toDataURL('image/webp', 0.88);
             } catch (e) {
                 this.productImageResult = canvas.toDataURL('image/jpeg', 0.88);
+            }
+
+            // Atualiza a foto atual na galeria
+            if (this.productGallery[this.activeGalleryIdx]) {
+                this.productGallery[this.activeGalleryIdx] = this.productImageResult;
             }
         };
 
@@ -1278,7 +1368,6 @@ class AdminApp {
     // EVENTOS GERAIS DO PAINEL
     // ==========================================
     bindEvents() {
-        // Alternância de Abas
         document.querySelectorAll('[data-tab-btn]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tab = btn.getAttribute('data-tab-btn');
@@ -1289,7 +1378,6 @@ class AdminApp {
             });
         });
 
-        // Logout
         const logoutHandler = () => {
             ApiService.logout();
             this.currentUser = null;
@@ -1299,7 +1387,6 @@ class AdminApp {
         document.getElementById('header-logout-btn')?.addEventListener('click', logoutHandler);
         document.getElementById('sidebar-logout-btn')?.addEventListener('click', logoutHandler);
 
-        // Filtro e Busca de Produtos
         const searchInput = document.getElementById('product-search-input');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -1321,21 +1408,18 @@ class AdminApp {
             });
         }
 
-        // Abrir Modal de Novo Produto
         document.getElementById('open-new-product-modal-btn')?.addEventListener('click', () => {
             this.openProductModal(null);
         });
 
-        // Editar Produto
         document.querySelectorAll('[data-edit-product-id]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-edit-product-id');
-                const prod = this.products.find(p => p.id === id);
+                const prod = this.products.find(p => String(p.id) === String(id));
                 if (prod) this.openProductModal(prod);
             });
         });
 
-        // Excluir Produto
         document.querySelectorAll('[data-delete-product-id]').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const id = btn.getAttribute('data-delete-product-id');
@@ -1348,7 +1432,6 @@ class AdminApp {
             });
         });
 
-        // Setup Croppers
         this.setupProductCropper();
         this.setupHeroCropper();
 
@@ -1382,7 +1465,8 @@ class AdminApp {
                 if (e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
                     reader.onload = (evt) => {
-                        this.loadProductImageToCropper(evt.target.result);
+                        this.addGalleryPhoto(evt.target.result);
+                        prodFileInput.value = '';
                     };
                     reader.readAsDataURL(e.target.files[0]);
                 }
@@ -1392,7 +1476,10 @@ class AdminApp {
         if (prodLoadUrlBtn && prodUrlInput) {
             prodLoadUrlBtn.addEventListener('click', () => {
                 const url = prodUrlInput.value.trim();
-                if (url) this.loadProductImageToCropper(url);
+                if (url) {
+                    this.addGalleryPhoto(url);
+                    prodUrlInput.value = '';
+                }
             });
         }
 
@@ -1445,20 +1532,27 @@ class AdminApp {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-product-modal-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<span>Salvando Peça...</span>`;
+            submitBtn.innerHTML = `<span>Processando Fotos &amp; Salvando...</span>`;
 
             const id = document.getElementById('modal-product-id')?.value;
             const price = parseFloat(document.getElementById('modal-product-price')?.value) || 0;
-            let finalImage = this.productImageResult || document.getElementById('modal-product-image')?.value;
 
-            if (finalImage && finalImage.startsWith('data:image/')) {
-                try {
-                    const uploadRes = await ApiService.uploadImage(finalImage);
-                    if (uploadRes && uploadRes.url) {
-                        finalImage = uploadRes.url;
-                    }
-                } catch (err) {}
+            // Fazer upload de todas as imagens da galeria que forem base64
+            const finalGallery = [];
+            for (let img of this.productGallery) {
+                if (img && img.startsWith('data:image/')) {
+                    try {
+                        const uploadRes = await ApiService.uploadImage(img);
+                        if (uploadRes && uploadRes.url) {
+                            finalGallery.push(uploadRes.url);
+                            continue;
+                        }
+                    } catch (err) {}
+                }
+                finalGallery.push(img);
             }
+
+            const mainCover = finalGallery[0] || 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
 
             const prodData = {
                 id: id || undefined,
@@ -1469,7 +1563,9 @@ class AdminApp {
                 formattedPrice: `R$ ${price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                 color: document.getElementById('modal-product-color')?.value,
                 badge: document.getElementById('modal-product-badge')?.value,
-                image: finalImage,
+                image: mainCover,
+                gallery: finalGallery,
+                images: finalGallery,
                 featured: true
             };
 
@@ -1477,7 +1573,7 @@ class AdminApp {
             await this.loadData();
             this.closeProductModal();
             this.render();
-            this.showToast(id ? 'Peça atualizada com sucesso!' : 'Nova peça cadastrada com sucesso!');
+            this.showToast(id ? 'Peça e galeria atualizadas com sucesso!' : 'Nova peça cadastrada com sucesso!');
         });
 
         document.getElementById('close-product-modal-btn')?.addEventListener('click', () => this.closeProductModal());
@@ -1526,9 +1622,7 @@ class AdminApp {
         document.getElementById('close-hero-modal-btn')?.addEventListener('click', () => this.closeHeroModal());
         document.getElementById('cancel-hero-modal-btn')?.addEventListener('click', () => this.closeHeroModal());
 
-        // ==========================================
-        // GERADOR DE ETIQUETAS CORREIOS
-        // ==========================================
+        // Etiquetas Correios
         document.querySelectorAll('[data-generate-label-id]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-generate-label-id');
@@ -1545,7 +1639,7 @@ class AdminApp {
             window.print();
         });
 
-        // Salvar Configurações de API
+        // Configurações de API
         document.getElementById('api-settings-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newSettings = {
@@ -1579,36 +1673,6 @@ class AdminApp {
         });
     }
 
-    openShippingLabelModal(order) {
-        const modal = document.getElementById('shipping-label-modal');
-        if (!modal || !order) return;
-
-        const tracking = order.shipping_tracking || ('NL' + Math.floor(100000000 + Math.random() * 900000000) + 'BR');
-        const service = (order.shipping_service || 'SEDEX').toUpperCase();
-
-        const destNameEl = document.getElementById('lbl-dest-name');
-        const destAddressEl = document.getElementById('lbl-dest-address');
-        const destBairroEl = document.getElementById('lbl-dest-bairro');
-        const destCepEl = document.getElementById('lbl-dest-cep');
-        const trackingEl = document.getElementById('lbl-tracking-code');
-        const serviceEl = document.getElementById('lbl-service-type');
-        const badgeEl = document.getElementById('lbl-badge-service');
-        const orderRefEl = document.getElementById('lbl-order-ref');
-        const senderCepEl = document.getElementById('lbl-sender-cep');
-
-        if (destNameEl) destNameEl.textContent = order.customer_name || 'Cliente Hot Chili';
-        if (destAddressEl) destAddressEl.textContent = order.shipping_address || 'Av. Brigadeiro Faria Lima, 3477 - Apto 142';
-        if (destBairroEl) destBairroEl.textContent = `${order.shipping_neighborhood || 'Jardins'} • ${order.shipping_city || 'São Paulo'} - ${order.shipping_state || 'SP'}`;
-        if (destCepEl) destCepEl.textContent = order.shipping_cep || '01452-000';
-        if (trackingEl) trackingEl.textContent = tracking;
-        if (serviceEl) serviceEl.textContent = service === 'SEDEX' ? 'SEDEX 10 / EXPRESSO NACIONAL' : 'PAC / ENCOMENDA ECONÔMICA';
-        if (badgeEl) badgeEl.textContent = service;
-        if (orderRefEl) orderRefEl.textContent = `Pedido #${order.id}`;
-        if (senderCepEl) senderCepEl.textContent = this.settings.correios_origin_cep || '01424-002';
-
-        modal.classList.remove('hidden');
-    }
-
     openProductModal(prod = null) {
         const modal = document.getElementById('product-modal');
         const title = document.getElementById('product-modal-title');
@@ -1622,14 +1686,28 @@ class AdminApp {
         document.getElementById('modal-product-badge').value = prod ? (prod.badge || '') : 'Novo';
         
         const initialImg = prod ? prod.image : 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
-        document.getElementById('modal-product-image').value = initialImg;
-        this.productImageResult = initialImg;
+        
+        let gal = [];
+        if (prod && prod.gallery && Array.isArray(prod.gallery) && prod.gallery.length > 0) {
+            gal = [...prod.gallery];
+        } else if (prod && prod.images && Array.isArray(prod.images) && prod.images.length > 0) {
+            gal = [...prod.images];
+        } else if (initialImg) {
+            gal = [initialImg];
+        } else {
+            gal = ['https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw'];
+        }
+
+        this.productGallery = gal;
+        this.activeGalleryIdx = 0;
 
         if (title) title.textContent = prod ? 'Editar Peça de Luxo' : 'Cadastrar Nova Peça';
         modal.classList.remove('hidden');
 
+        this.renderGalleryThumbnails();
+
         setTimeout(() => {
-            this.loadProductImageToCropper(initialImg);
+            this.loadProductImageToCropper(this.productGallery[0]);
         }, 50);
     }
 

@@ -55,7 +55,15 @@ switch ($method) {
                     $p['category'] = $p['category_id'];
                     $p['price'] = (float)$p['price'];
                     $p['formattedPrice'] = 'R$ ' . number_format($p['price'], 2, ',', '.');
-                    $p['gallery'] = json_decode($p['gallery'] ?? '[]', true);
+                    $gal = json_decode($p['gallery'] ?? '[]', true);
+                    if (!is_array($gal) || empty($gal)) {
+                        $gal = !empty($p['image']) ? [$p['image']] : [];
+                    }
+                    if (!empty($p['image']) && !in_array($p['image'], $gal)) {
+                        array_unshift($gal, $p['image']);
+                    }
+                    $p['gallery'] = array_values(array_unique(array_filter($gal)));
+                    $p['images'] = $p['gallery'];
                     $p['details'] = json_decode($p['details'] ?? '[]', true);
                 }
 
@@ -76,13 +84,23 @@ switch ($method) {
         $price = (float)($body['price'] ?? 0);
         $promotionalPrice = !empty($body['promotional_price']) ? (float)$body['promotional_price'] : null;
         $color = $body['color'] ?? 'Ouro Nobre';
-        $image = $body['image'] ?? ($body['imageUrl'] ?? '');
+        $rawGallery = $body['gallery'] ?? ($body['images'] ?? []);
+        if (!is_array($rawGallery)) {
+            $rawGallery = !empty($rawGallery) ? [$rawGallery] : [];
+        }
+        
+        $image = $body['image'] ?? ($body['imageUrl'] ?? ($rawGallery[0] ?? ''));
+        if (!in_array($image, $rawGallery) && !empty($image)) {
+            array_unshift($rawGallery, $image);
+        }
+        $rawGallery = array_values(array_unique(array_filter($rawGallery)));
+        $gallery = json_encode($rawGallery, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        
         $badge = $body['badge'] ?? null;
         $description = $body['description'] ?? '';
         $featured = !empty($body['featured']) ? 1 : 0;
         $active = isset($body['active']) ? (int)$body['active'] : 1;
         $stockTotal = (int)($body['stock_total'] ?? 10);
-        $gallery = json_encode($body['gallery'] ?? []);
         $details = json_encode($body['details'] ?? []);
 
         if (empty($name) || $price <= 0) {

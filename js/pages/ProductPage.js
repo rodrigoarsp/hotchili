@@ -1,6 +1,7 @@
 /**
  * ProductPage.js
- * Controlador dinâmico da Página de Detalhe de Produto com sincronização em tempo real via MySQL.
+ * Controlador dinâmico da Página de Detalhe de Produto com sincronização em tempo real via MySQL
+ * e Galeria Dinâmica Multi-Fotos com seleção interativa de miniaturas.
  */
 import { ProductService } from '../services/ProductService.js';
 import { CategoryService } from '../services/CategoryService.js';
@@ -18,7 +19,7 @@ export class ProductPage {
         const productId = getQueryParam('id', 'mb-01');
         let product = ProductService.getById(productId) || ProductService.getFeatured()[0];
 
-        // 1. Renderizar inicialmente (com dados síncronos se existirem)
+        // 1. Renderizar inicialmente com dados síncronos
         if (product) {
             this.renderProductDetails(product);
         }
@@ -54,7 +55,19 @@ export class ProductPage {
 
         let selectedSize = 'P';
         let selectedColor = product.color || 'Textured Gold';
-        const safeImageUrl = formatImageUrl(product.image);
+
+        // Obter lista de fotos da galeria
+        let rawGallery = [];
+        if (product.gallery && Array.isArray(product.gallery) && product.gallery.length > 0) {
+            rawGallery = product.gallery;
+        } else if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            rawGallery = product.images;
+        } else if (product.image) {
+            rawGallery = [product.image];
+        }
+
+        const galleryList = rawGallery.map(img => formatImageUrl(img));
+        const initialCover = galleryList[0] || formatImageUrl(product.image);
 
         // 1. Atualizar Título da Página
         document.title = `${product.name} | Hot Chili Luxury Beachwear`;
@@ -77,27 +90,45 @@ export class ProductPage {
         const colorName = $('#selected-color-name');
         if (colorName) colorName.textContent = selectedColor;
 
-        // Imagem Principal
+        // 4. Imagem Principal & Galeria de Miniaturas
         const mainImg = $('#main-product-image');
         if (mainImg) {
-            mainImg.src = safeImageUrl;
+            mainImg.src = initialCover;
             mainImg.onerror = () => {
                 mainImg.src = 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
             };
         }
 
-        // Thumbnails
-        const thumb1 = $('#thumb-1');
-        const thumb2 = $('#thumb-2');
-        const thumb3 = $('#thumb-3');
-        [thumb1, thumb2, thumb3].forEach(t => {
-            if (t) {
-                t.src = safeImageUrl;
-                t.onerror = () => {
-                    t.src = 'https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';
-                };
-            }
-        });
+        // Renderizar Miniaturas Dinâmicas
+        const thumbsContainer = $('#product-thumbnails');
+        if (thumbsContainer) {
+            thumbsContainer.innerHTML = galleryList.map((imgUrl, idx) => `
+                <button class="thumb-btn border-2 ${idx === 0 ? 'border-primary shadow-sm' : 'border-transparent hover:border-primary/50'} rounded-sm overflow-hidden w-16 h-22 sm:w-20 sm:h-28 bg-surface-container flex-shrink-0 transition-all duration-300 active:scale-95 cursor-pointer" data-gallery-img="${imgUrl}">
+                    <img src="${imgUrl}" alt="${product.name} - Foto ${idx + 1}" onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AP1WRLv0AnpwWM9lFcATKKXnjeEEIDVm63QfdCjpG49SQN4FljTrNYzhaPJVK1LEPnEhhjIaNlHs2lKWfiITcu0SUaa8Qoq6wYzJK2kT6QYFoAqhaBcrOy33fDlP5byn3t1i7m0XEGUtA-y93dEN86-pEVxdBCZBftW7_J4E7l-MorlT-bYzoaqn6zWJFXYjQ6PPZcFMsx471SMUK6dFMIQYMzbA3lClJ6B837gKMn7E5_DFcGKV7d2nq9YhJw';" class="w-full h-full object-cover"/>
+                </button>
+            `).join('');
+
+            const thumbBtns = thumbsContainer.querySelectorAll('.thumb-btn');
+            thumbBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    thumbBtns.forEach(b => {
+                        b.classList.remove('border-primary', 'shadow-sm');
+                        b.classList.add('border-transparent');
+                    });
+                    btn.classList.remove('border-transparent');
+                    btn.classList.add('border-primary', 'shadow-sm');
+                    
+                    const targetSrc = btn.getAttribute('data-gallery-img');
+                    if (mainImg && targetSrc) {
+                        mainImg.style.opacity = '0.5';
+                        setTimeout(() => {
+                            mainImg.src = targetSrc;
+                            mainImg.style.opacity = '1';
+                        }, 100);
+                    }
+                });
+            });
+        }
 
         const badgeEl = $('#product-badge');
         if (badgeEl) {
@@ -109,7 +140,7 @@ export class ProductPage {
             }
         }
 
-        // 4. Seletores de Tamanho
+        // 5. Seletores de Tamanho
         const sizeButtons = $$('.size-btn');
         sizeButtons.forEach(btn => {
             btn.onclick = () => {
@@ -122,7 +153,7 @@ export class ProductPage {
             };
         });
 
-        // 5. Seletores de Cor
+        // 6. Seletores de Cor
         const colorButtons = $$('#color-swatches button');
         colorButtons.forEach(btn => {
             btn.onclick = () => {
@@ -133,7 +164,7 @@ export class ProductPage {
             };
         });
 
-        // 6. Botão Adicionar à Sacola
+        // 7. Botão Adicionar à Sacola
         const addToBagBtn = $('#add-to-bag-btn');
         if (addToBagBtn) {
             addToBagBtn.onclick = () => {
@@ -142,7 +173,7 @@ export class ProductPage {
             };
         }
 
-        // 7. Cálculo de Frete
+        // 8. Cálculo de Frete
         const cepInput = $('#cep-input');
         const calcCepBtn = $('#calc-cep-btn');
         const cepResult = $('#cep-result');
