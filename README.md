@@ -7,7 +7,7 @@
 ## ✨ Funcionalidades Principais
 
 ### 🛍️ Loja Virtual (E-commerce)
-- **Design de Alta Costura**: Estética *Dark & Gold Luxury*, micro-interações fluidas e tipografia editorial (`Cinzel`, `Playfair Display` e `Hanken Grotesk`).
+- **Design de Alta Costura**: Estética *Dark & Gold Luxury*, micro-interações fluidas e tipografia moderna de alta legibilidade (`Outfit` e `Plus Jakarta Sans`).
 - **100% Responsivo**: Layout otimizado para celulares, tablets e desktops com navegação por gestos e drawers fluídos.
 - **Vitrines e Categorias Dinâmicas**:
   - Moda Banho (Biquínis, Maiôs, Sungas)

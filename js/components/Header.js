@@ -41,9 +41,21 @@ export class Header {
             <header class="bg-surface/80 backdrop-blur-xl border-b border-primary/10 shadow-sm shadow-primary/5 fixed top-0 w-full z-50 transition-all duration-300 hidden lg:block">
                 <div class="flex items-center justify-between w-full max-w-7xl mx-auto px-6 lg:px-10 xl:px-12 py-3">
                     <!-- Left: Brand Identity -->
-                    <a href="index.html" class="flex flex-col items-center flex-shrink-0 hover:opacity-80 transition-opacity duration-300 min-w-[140px]">
-                        <span class="font-display-lg text-[24px] xl:text-[26px] tracking-[0.2em] text-on-surface font-bold leading-tight">HOT CHILI</span>
-                        <span class="font-label-sm text-[9px] text-on-surface-variant tracking-[0.3em] uppercase mt-0.5 font-medium">— MODA PRAIA —</span>
+                    <a href="index.html" class="flex items-center gap-2.5 flex-shrink-0 hover:opacity-85 transition-opacity duration-300 min-w-[170px] group">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-7 h-7 xl:w-8 xl:h-8 flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
+                            <defs>
+                                <linearGradient id="gold-palm-head" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#efbf62" />
+                                    <stop offset="50%" stop-color="#d4a445" />
+                                    <stop offset="100%" stop-color="#7b5800" />
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#gold-palm-head)" d="M52.5 42C52.5 42 61 21 81 19C81 19 71 32 55 39C67 40 90 46 92 58C92 58 77 53 55.5 44.5C59 52 68 70 70 79C70 79 59 67 51 48C43 67 32 79 32 79C34 70 43 52 46.5 44.5C25 53 10 58 10 58C12 46 35 40 47 39C31 32 21 19 21 19C41 21 49.5 42 49.5 42C49.5 42 49.5 72 47 92C49 92.5 51 92.5 53 92C50.5 72 50.5 42 50.5 42H52.5Z"/>
+                        </svg>
+                        <div class="flex flex-col items-start">
+                            <span class="font-display-lg text-[22px] xl:text-[24px] tracking-[0.18em] text-on-surface font-bold leading-tight">HOT CHILI</span>
+                            <span class="font-label-sm text-[8.5px] text-on-surface-variant tracking-[0.25em] uppercase font-medium">— MODA PRAIA —</span>
+                        </div>
                     </a>
                     <!-- Center: Navigation with Dropdowns -->
                     <nav class="flex items-center gap-6 xl:gap-8">
@@ -63,18 +75,30 @@ export class Header {
             </header>
 
             <!-- Mobile & Tablet Header (< 1024px) -->
-            <header class="bg-surface/85 backdrop-blur-xl border-b border-primary/10 shadow-sm fixed top-0 w-full z-50 transition-all duration-300 lg:hidden">
-                <div class="flex justify-between items-center px-4 sm:px-6 py-3.5 max-w-7xl mx-auto">
-                    <button aria-label="Abrir Menu" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors rounded-full active:bg-surface-variant/50" id="mobile-menu-btn">
+            <header class="bg-surface/85 backdrop-blur-xl border-b border-primary/10 shadow-sm fixed top-0 w-full z-50 h-16 flex items-center transition-all duration-300 lg:hidden">
+                <div class="flex justify-between items-center px-4 sm:px-6 w-full max-w-7xl mx-auto h-full">
+                    <button aria-label="Abrir Menu" class="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary transition-colors rounded-full active:bg-surface-variant/50" id="mobile-menu-btn">
                         <span class="material-symbols-outlined text-2xl">menu</span>
                     </button>
-                    <a class="flex flex-col items-center flex-shrink-0 hover:opacity-80 transition-opacity" href="index.html">
-                        <span class="font-display-lg text-xl sm:text-2xl tracking-[0.2em] text-on-surface font-bold leading-tight">HOT CHILI</span>
-                        <span class="font-label-sm text-[8px] sm:text-[9px] text-on-surface-variant tracking-[0.3em] uppercase font-medium">— MODA PRAIA —</span>
+                    <a class="flex items-center gap-2 flex-shrink-0 hover:opacity-85 transition-opacity" href="index.html">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0">
+                            <defs>
+                                <linearGradient id="gold-palm-mob" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#efbf62" />
+                                    <stop offset="50%" stop-color="#d4a445" />
+                                    <stop offset="100%" stop-color="#7b5800" />
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#gold-palm-mob)" d="M52.5 42C52.5 42 61 21 81 19C81 19 71 32 55 39C67 40 90 46 92 58C92 58 77 53 55.5 44.5C59 52 68 70 70 79C70 79 59 67 51 48C43 67 32 79 32 79C34 70 43 52 46.5 44.5C25 53 10 58 10 58C12 46 35 40 47 39C31 32 21 19 21 19C41 21 49.5 42 49.5 42C49.5 42 49.5 72 47 92C49 92.5 51 92.5 53 92C50.5 72 50.5 42 50.5 42H52.5Z"/>
+                        </svg>
+                        <div class="flex flex-col items-start">
+                            <span class="font-display-lg text-lg sm:text-xl tracking-[0.18em] text-on-surface font-bold leading-tight">HOT CHILI</span>
+                            <span class="font-label-sm text-[8px] sm:text-[9px] text-on-surface-variant tracking-[0.25em] uppercase font-medium">— MODA PRAIA —</span>
+                        </div>
                     </a>
-                    <button id="mobile-cart-toggle-btn" aria-label="Shopping Bag" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors relative rounded-full active:bg-surface-variant/50">
+                    <button id="mobile-cart-toggle-btn" aria-label="Shopping Bag" class="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary transition-colors relative rounded-full active:bg-surface-variant/50">
                         <span class="material-symbols-outlined text-2xl">shopping_bag</span>
-                        <span id="mobile-cart-badge-count" class="absolute top-1 right-1 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">${cartCount}</span>
+                        <span id="mobile-cart-badge-count" class="absolute top-0.5 right-0.5 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">${cartCount}</span>
                     </button>
                 </div>
             </header>
@@ -86,9 +110,14 @@ export class Header {
             <aside id="mobile-menu" class="fixed top-0 left-0 h-full w-full max-w-sm sm:max-w-md bg-surface shadow-2xl z-50 transform -translate-x-full invisible pointer-events-none transition-all duration-400 ease-out-quint flex flex-col lg:hidden" aria-label="Menu de Navegação Mobile">
                 <!-- Header do Menu -->
                 <div class="flex justify-between items-center px-6 py-4 border-b border-outline-variant/30">
-                    <div class="flex flex-col">
-                        <span class="font-display-lg text-lg tracking-[0.18em] text-on-surface font-bold">HOT CHILI</span>
-                        <span class="font-label-sm text-[8px] text-on-surface-variant tracking-[0.25em] uppercase font-medium">Menu Principal</span>
+                    <div class="flex items-center gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-6 h-6 flex-shrink-0">
+                            <path fill="url(#gold-palm-mob)" d="M52.5 42C52.5 42 61 21 81 19C81 19 71 32 55 39C67 40 90 46 92 58C92 58 77 53 55.5 44.5C59 52 68 70 70 79C70 79 59 67 51 48C43 67 32 79 32 79C34 70 43 52 46.5 44.5C25 53 10 58 10 58C12 46 35 40 47 39C31 32 21 19 21 19C41 21 49.5 42 49.5 42C49.5 42 49.5 72 47 92C49 92.5 51 92.5 53 92C50.5 72 50.5 42 50.5 42H52.5Z"/>
+                        </svg>
+                        <div class="flex flex-col">
+                            <span class="font-display-lg text-lg tracking-[0.18em] text-on-surface font-bold">HOT CHILI</span>
+                            <span class="font-label-sm text-[8px] text-on-surface-variant tracking-[0.25em] uppercase font-medium">Menu Principal</span>
+                        </div>
                     </div>
                     <button id="mobile-menu-close-btn" class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors rounded-full active:bg-surface-variant" aria-label="Fechar Menu">
                         <span class="material-symbols-outlined text-2xl">close</span>

@@ -23,9 +23,14 @@ export class Footer {
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12 lg:gap-16">
                         <!-- Coluna 1: Marca & Redes Sociais -->
                         <div class="flex flex-col md:col-span-2 lg:col-span-1">
-                            <h3 class="font-display-lg text-2xl md:text-3xl font-bold tracking-[0.2em] text-[#efbf62] mb-4 md:mb-6">
-                                HOT CHILI
-                            </h3>
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 md:w-9 md:h-9 flex-shrink-0">
+                                    <path fill="#efbf62" d="M52.5 42C52.5 42 61 21 81 19C81 19 71 32 55 39C67 40 90 46 92 58C92 58 77 53 55.5 44.5C59 52 68 70 70 79C70 79 59 67 51 48C43 67 32 79 32 79C34 70 43 52 46.5 44.5C25 53 10 58 10 58C12 46 35 40 47 39C31 32 21 19 21 19C41 21 49.5 42 49.5 42C49.5 42 49.5 72 47 92C49 92.5 51 92.5 53 92C50.5 72 50.5 42 50.5 42H52.5Z"/>
+                                </svg>
+                                <h3 class="font-display-lg text-2xl md:text-3xl font-bold tracking-[0.2em] text-[#efbf62]">
+                                    HOT CHILI
+                                </h3>
+                            </div>
                             <p class="font-body-md text-gray-300 text-sm sm:text-base leading-relaxed mb-6 md:mb-8 max-w-md">
                                 A marca de moda praia autoral feita para quem busca brilhar sob o sol com elegância, texturas manuais e metais nobres banhados a ouro.
                             </p>

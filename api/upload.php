@@ -8,15 +8,18 @@ require_once __DIR__ . '/db.php';
 
 $uploadDir = dirname(__DIR__) . '/uploads';
 
-// Garantir criação e permissão total de escrita na pasta uploads
+// Garantir criação e permissão segura da pasta uploads
 if (!file_exists($uploadDir)) {
-    @mkdir($uploadDir, 0777, true);
+    @mkdir($uploadDir, 0755, true);
 }
-@chmod($uploadDir, 0777);
+@chmod($uploadDir, 0755);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
+    // Exigir autenticação administrativa
+    requireAdminAuth();
+
     // 1. Upload via Multipart Form Data (File Input)
     if (!empty($_FILES['image'])) {
         $file = $_FILES['image'];
@@ -29,9 +32,9 @@ if ($method === 'POST') {
         $mime = finfo_file($finfo, $file['tmp_name']);
         finfo_close($finfo);
 
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($mime, $allowedMimes)) {
-            sendJson(['error' => 'Formato não suportado. Envie imagens JPG, PNG ou WEBP.'], 400);
+            sendJson(['error' => 'Formato não suportado. Envie apenas imagens JPG, PNG, WEBP ou GIF.'], 400);
         }
 
         $ext = match ($mime) {
@@ -39,7 +42,6 @@ if ($method === 'POST') {
             'image/png' => 'png',
             'image/webp' => 'webp',
             'image/gif' => 'gif',
-            'image/svg+xml' => 'svg',
             default => 'jpg'
         };
 

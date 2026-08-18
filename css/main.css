@@ -8,6 +8,7 @@ html {
 }
 
 body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: clip;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -17,7 +18,7 @@ body {
 .sticky-subnav {
     position: -webkit-sticky !important;
     position: sticky !important;
-    top: 56px !important;
+    top: 64px !important;
     z-index: 40 !important;
 }
 

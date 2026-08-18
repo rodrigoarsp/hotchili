@@ -50,12 +50,14 @@ if (typeof tailwind !== 'undefined') {
                     'section-gap': '64px'
                 },
                 fontFamily: {
-                    'display-lg': ['Playfair Display', 'Cinzel', 'serif'],
-                    'headline-lg': ['Playfair Display', 'serif'],
-                    'title-md': ['Hanken Grotesk', 'sans-serif'],
-                    'body-lg': ['Hanken Grotesk', 'sans-serif'],
-                    'body-md': ['Hanken Grotesk', 'sans-serif'],
-                    'label-sm': ['Hanken Grotesk', 'sans-serif']
+                    'display-lg': ['Outfit', 'Plus Jakarta Sans', 'sans-serif'],
+                    'headline-lg': ['Outfit', 'Plus Jakarta Sans', 'sans-serif'],
+                    'title-md': ['Outfit', 'Plus Jakarta Sans', 'sans-serif'],
+                    'body-lg': ['Plus Jakarta Sans', 'sans-serif'],
+                    'body-md': ['Plus Jakarta Sans', 'sans-serif'],
+                    'label-sm': ['Plus Jakarta Sans', 'sans-serif'],
+                    'serif': ['Outfit', 'serif'],
+                    'sans': ['Plus Jakarta Sans', 'sans-serif']
                 }
             }
         }

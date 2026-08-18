@@ -76,6 +76,7 @@ switch ($method) {
 
     case 'POST':
     case 'PUT':
+        requireAdminAuth();
         $body = getJsonBody();
         $prodId = $id ?: ($body['id'] ?? ('hc-' . substr(md5(uniqid()), 0, 6)));
         $name = trim($body['name'] ?? '');
@@ -169,6 +170,7 @@ switch ($method) {
         break;
 
     case 'DELETE':
+        requireAdminAuth();
         $prodId = $id ?: ($_GET['id'] ?? null);
         if (!$prodId) {
             sendJson(['error' => 'ID do produto é obrigatório para exclusão.'], 400);

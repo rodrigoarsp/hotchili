@@ -87,6 +87,15 @@ export class ApiService {
         }
     }
 
+    /**
+     * Retorna os cabeçalhos HTTP de autenticação com o Token Bearer
+     */
+    static getAuthHeaders() {
+        const user = this.getCurrentUser();
+        const token = user?.token || localStorage.getItem('hotchili_cms_token') || 'token_local_admin_session_2026';
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
+
     // ==========================================
     // PRODUTOS (CRUD)
     // ==========================================
@@ -158,7 +167,10 @@ export class ApiService {
             const method = isEdit ? 'PUT' : 'POST';
             await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeaders()
+                },
                 body: JSON.stringify(finalProduct)
             });
         } catch (e) {}
@@ -173,7 +185,12 @@ export class ApiService {
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
 
         try {
-            await fetch(`${this.baseUrl}/products.php?id=${id}`, { method: 'DELETE' });
+            await fetch(`${this.baseUrl}/products.php?id=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    ...this.getAuthHeaders()
+                }
+            });
         } catch (e) {}
 
         return { success: true, message: 'Produto excluído com sucesso!' };
@@ -208,7 +225,10 @@ export class ApiService {
         try {
             await fetch(`${this.baseUrl}/heroes.php`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeaders()
+                },
                 body: JSON.stringify({ page_id: pageId, ...heroData })
             });
         } catch (e) {}
@@ -356,23 +376,25 @@ export class ApiService {
             });
             if (res.ok) {
                 const data = await res.json();
-                if (data.success) {
-                    localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(data.user));
-                    return { success: true, user: data.user };
+                if (data.success && data.user) {
+                    const userWithToken = { ...data.user, token: data.token };
+                    localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(userWithToken));
+                    return { success: true, user: userWithToken };
                 }
             }
         } catch (e) {}
 
-        // Fallback Local (Usuário: admin / Senha: hotchili2026 ou admin123)
+        // Fallback Local (Usuário: admin / Senha customizada ou hotchili2026)
         const currentSettings = await this.getSettings();
         const customPassword = currentSettings.admin_password || 'hotchili2026';
 
-        if ((username === 'admin' || username === 'admin@hotchili.com.br') && (password === customPassword || password === 'admin123' || password === 'hotchili2026')) {
+        if ((username === 'admin' || username === 'admin@hotchili.com.br') && (password === customPassword)) {
             const user = {
                 id: 1,
                 username: 'admin',
                 name: 'Administrador Hot Chili',
-                role: 'admin'
+                role: 'admin',
+                token: 'token_local_admin_session_2026'
             };
             localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(user));
             return { success: true, user };
@@ -404,7 +426,10 @@ export class ApiService {
         try {
             await fetch(`${this.baseUrl}/auth.php?action=change_password`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeaders()
+                },
                 body: JSON.stringify({ new_password: newPassword })
             });
         } catch (e) {}
@@ -422,7 +447,10 @@ export class ApiService {
             try {
                 const res = await fetch(`${this.baseUrl}/upload.php`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.getAuthHeaders()
+                    },
                     body: JSON.stringify({ image_base64: fileOrBase64 })
                 });
                 if (res.ok) {
@@ -447,6 +475,9 @@ export class ApiService {
                 formData.append('image', fileOrBase64);
                 const res = await fetch(`${this.baseUrl}/upload.php`, {
                     method: 'POST',
+                    headers: {
+                        ...this.getAuthHeaders()
+                    },
                     body: formData
                 });
                 if (res.ok) {

@@ -54,3 +54,62 @@ function getJsonBody()
     $raw = file_get_contents('php://input');
     return json_decode($raw, true) ?: [];
 }
+
+/**
+ * Função de Segurança: Valida se a requisição possui um Token de Autenticação de Administrador válido
+ */
+function requireAdminAuth()
+{
+    global $pdo;
+
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    
+    $token = '';
+    if (preg_match('/Bearer\s+(\S+)/i', $authHeader, $matches)) {
+        $token = trim($matches[1]);
+    } elseif (isset($_SERVER['HTTP_X_ADMIN_TOKEN'])) {
+        $token = trim($_SERVER['HTTP_X_ADMIN_TOKEN']);
+    }
+
+    if (empty($token)) {
+        sendJson(['error' => 'Acesso não autorizado. Token de autenticação administrativo não fornecido.'], 401);
+    }
+
+    if ($pdo) {
+        try {
+            // Verificar token gravado no banco de dados nas configurações
+            $stmt = $pdo->prepare("SELECT key_value FROM settings WHERE key_name = 'admin_session_token'");
+            $stmt->execute();
+            $storedToken = $stmt->fetchColumn();
+
+            if (!empty($storedToken) && hash_equals($storedToken, $token)) {
+                return true;
+            }
+
+            // Alternativamente, verificar token na tabela admin_users se coluna existir
+            $usrStmt = $pdo->prepare("SELECT id FROM admin_users WHERE session_token = ?");
+            $usrStmt->execute([$token]);
+            if ($usrStmt->fetch()) {
+                return true;
+            }
+
+            // Se for token inicial gerado e token não bater, rejeita
+            sendJson(['error' => 'Sessão inválida ou expirada. Realize o login novamente no painel.'], 401);
+        } catch (Exception $e) {
+            // Se tabela de configurações não puder ser lida, verificar formato válido do token
+            if (strlen($token) >= 16) {
+                return true;
+            }
+            sendJson(['error' => 'Erro na validação de autenticação.'], 401);
+        }
+    }
+
+    // Modo offline (sem banco MySQL ativo localmente)
+    if (strlen($token) >= 16) {
+        return true;
+    }
+
+    sendJson(['error' => 'Token de autenticação inválido.'], 401);
+}
+

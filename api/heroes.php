@@ -117,6 +117,7 @@ switch ($method) {
 
     case 'POST':
     case 'PUT':
+        requireAdminAuth();
         $body = getJsonBody();
         $targetPageId = $pageId ?: ($body['page_id'] ?? null);
 

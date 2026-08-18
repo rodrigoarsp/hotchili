@@ -144,45 +144,22 @@ export class SubNavBar {
     }
 
     /**
-     * 3. Conteúdo do Painel 2 da Página de Produto (Breadcrumb e Subcategorias)
+     * 3. Conteúdo do Painel 2 da Página de Produto (Apenas Trilha Breadcrumb)
      */
     static renderProductContent(product, categoryId = null) {
         const categories = CategoryService.getCategories();
         const catId = categoryId || product?.category || 'moda-banho';
         const currentCategory = categories.find(c => c.id === catId) || categories[0];
-        if (!currentCategory) return '';
-
-        const chips = [];
-        chips.push(`
-            <a href="${currentCategory.href}?sub=all" class="px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-transparent hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface border border-outline-variant/30 font-label-sm text-[11px] sm:text-xs uppercase tracking-wider whitespace-nowrap transition-colors duration-200 flex-shrink-0">
-                Todos
-            </a>
-        `);
-
-        currentCategory.subcategories.filter(s => !s.highlight).forEach(sub => {
-            const subUrl = new URL(sub.href, 'http://localhost');
-            const subParam = subUrl.searchParams.get('sub');
-            const isActive = product && subParam === product.subcategory;
-            chips.push(`
-                <a href="${sub.href}" class="px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full ${isActive ? 'bg-primary text-on-primary font-semibold shadow-xs border border-primary' : 'bg-transparent hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface border border-outline-variant/30 hover:border-primary/40'} font-label-sm text-[11px] sm:text-xs uppercase tracking-wider whitespace-nowrap transition-colors duration-200 flex-shrink-0">
-                    ${sub.name}
-                </a>
-            `);
-        });
-
         const prodName = product?.name || 'Produto';
 
         return `
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-2 sm:py-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
-                <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0" id="category-sub-bar">
-                    ${chips.join('')}
-                </div>
-                <nav class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs uppercase tracking-wider text-on-surface-variant font-label-sm w-full sm:w-auto justify-start sm:justify-end overflow-x-auto hide-scrollbar whitespace-nowrap" id="breadcrumb-trail">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-2.5 sm:py-3 flex items-center justify-start">
+                <nav class="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs uppercase tracking-wider text-on-surface-variant font-label-sm overflow-x-auto hide-scrollbar whitespace-nowrap" id="breadcrumb-trail">
                     <a href="index.html" class="hover:text-primary transition-colors">Início</a>
-                    <span>/</span>
+                    <span class="opacity-40">/</span>
                     <a href="${currentCategory.href}" class="hover:text-primary transition-colors">${currentCategory.name}</a>
-                    <span>/</span>
-                    <span class="text-on-surface font-semibold truncate max-w-[150px] sm:max-w-none">${prodName}</span>
+                    <span class="opacity-40">/</span>
+                    <span class="text-on-surface font-semibold truncate max-w-[200px] sm:max-w-none">${prodName}</span>
                 </nav>
             </div>
         `;

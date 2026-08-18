@@ -1,0 +1,20 @@
+# =========================================================
+# PROTEÇÃO DO DIRETÓRIO DE UPLOADS - HOT CHILI
+# Bloqueio de Execução de Scripts PHP/CGI
+# =========================================================
+
+# Desativar listagem de diretório
+Options -Indexes -ExecCGI
+
+# Impedir execução de scripts de qualquer extensão de código
+<FilesMatch "\.(php|php3|php4|php5|php7|php8|phtml|pl|py|cgi|sh|phar|inc|asp|jsp)$">
+    Require all denied
+</FilesMatch>
+
+# Desativar motor PHP caso esteja habilitado no Apache
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>

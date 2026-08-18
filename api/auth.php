@@ -17,40 +17,62 @@ if ($method === 'POST' && $action === 'login') {
         sendJson(['error' => 'Usuário e senha são obrigatórios.'], 400);
     }
 
-    // 1. Tentar validar via banco MySQL se conectado
+    // 1. Validar via banco MySQL se conectado
     if ($pdo) {
         try {
             $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? OR email = ?");
             $stmt->execute([$username, $username]);
             $user = $stmt->fetch();
 
-            if ($user) {
-                // Verificar senha com password_verify ou fallback para senha mestra
-                if (password_verify($password, $user['password_hash']) || $password === 'hotchili2026' || $password === 'admin123') {
-                    // Atualizar último login
-                    $upd = $pdo->prepare("UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ?");
-                    $upd->execute([$user['id']]);
+            if ($user && password_verify($password, $user['password_hash'])) {
+                $newToken = 'token_' . bin2hex(random_bytes(32));
 
-                    sendJson([
-                        'success' => true,
-                        'token' => 'token_' . bin2hex(random_bytes(16)),
-                        'user' => [
-                            'id' => $user['id'],
-                            'username' => $user['username'],
-                            'name' => $user['name'],
-                            'role' => $user['role']
-                        ]
-                    ]);
-                }
+                // Salvar token de sessão no banco
+                $upd = $pdo->prepare("UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ?");
+                $upd->execute([$user['id']]);
+
+                $stgStmt = $pdo->prepare("INSERT INTO settings (key_name, key_value) VALUES ('admin_session_token', ?) ON DUPLICATE KEY UPDATE key_value = VALUES(key_value)");
+                $stgStmt->execute([$newToken]);
+
+                sendJson([
+                    'success' => true,
+                    'token' => $newToken,
+                    'user' => [
+                        'id' => $user['id'],
+                        'username' => $user['username'],
+                        'name' => $user['name'],
+                        'role' => $user['role']
+                    ]
+                ]);
             }
         } catch (Exception $e) {}
     }
 
-    // 2. Validação padrão / Fallback local (Usuário: admin / Senha: hotchili2026 ou admin123)
-    if (($username === 'admin' || $username === 'admin@hotchili.com.br') && ($password === 'hotchili2026' || $password === 'admin123')) {
+    // 2. Validação local (apenas se a senha cadastrada/configurada for válida)
+    // Se o banco estiver configurado ou offline, verificar hash ou senha customizada
+    $configuredPass = 'hotchili2026';
+    if ($pdo) {
+        try {
+            $passStmt = $pdo->prepare("SELECT key_value FROM settings WHERE key_name = 'admin_password'");
+            $passStmt->execute();
+            $val = $passStmt->fetchColumn();
+            if ($val) $configuredPass = $val;
+        } catch (Exception $e) {}
+    }
+
+    if (($username === 'admin' || $username === 'admin@hotchili.com.br') && ($password === $configuredPass)) {
+        $newToken = 'token_' . bin2hex(random_bytes(32));
+
+        if ($pdo) {
+            try {
+                $stgStmt = $pdo->prepare("INSERT INTO settings (key_name, key_value) VALUES ('admin_session_token', ?) ON DUPLICATE KEY UPDATE key_value = VALUES(key_value)");
+                $stgStmt->execute([$newToken]);
+            } catch (Exception $e) {}
+        }
+
         sendJson([
             'success' => true,
-            'token' => 'token_' . md5(uniqid()),
+            'token' => $newToken,
             'user' => [
                 'id' => 1,
                 'username' => 'admin',
@@ -64,6 +86,9 @@ if ($method === 'POST' && $action === 'login') {
 }
 
 if ($method === 'POST' && $action === 'change_password') {
+    // Exigir autenticação prévia
+    requireAdminAuth();
+
     $body = getJsonBody();
     $newPassword = trim($body['new_password'] ?? '');
 
@@ -77,7 +102,7 @@ if ($method === 'POST' && $action === 'change_password') {
             $stmt = $pdo->prepare("UPDATE admin_users SET password_hash = ? WHERE username = 'admin'");
             $stmt->execute([$hash]);
 
-            $stgStmt = $pdo->prepare("UPDATE settings SET key_value = ? WHERE key_name = 'admin_password'");
+            $stgStmt = $pdo->prepare("INSERT INTO settings (key_name, key_value) VALUES ('admin_password', ?) ON DUPLICATE KEY UPDATE key_value = VALUES(key_value)");
             $stgStmt->execute([$newPassword]);
 
             sendJson(['success' => true, 'message' => 'Senha alterada com sucesso no banco MySQL!']);
@@ -86,3 +111,4 @@ if ($method === 'POST' && $action === 'change_password') {
 
     sendJson(['success' => true, 'message' => 'Senha alterada com sucesso!']);
 }
+

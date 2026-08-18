@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hot Chili — CMS Headless &amp; Admin Dashboard</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     
     <!-- Material Symbols Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -33,9 +35,9 @@
                         'on-surface-muted': '#9ca3af',
                     },
                     fontFamily: {
-                        display: ['Cinzel', 'serif'],
-                        editorial: ['Playfair Display', 'serif'],
-                        body: ['Hanken Grotesk', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        editorial: ['Outfit', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif'],
                     }
                 }
             }
@@ -45,7 +47,7 @@
         body {
             background-color: #0f0f10;
             color: #f4f4f5;
-            font-family: 'Hanken Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         /* Custom scrollbars */
         ::-webkit-scrollbar {
@@ -94,6 +96,6 @@
     <div id="root"></div>
 
     <!-- Aplicação Nativa ES Module Ultra-rápida (Compatibilidade Total com cPanel) -->
-    <script type="module" src="js/admin-app.js?v=3.0.0"></script>
+    <script type="module" src="/admin/js/admin-app.js?v=3.0.0"></script>
 </body>
 </html>

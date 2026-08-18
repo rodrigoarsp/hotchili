@@ -5,11 +5,13 @@
  * Auto-popula Categorias, Heroes e Catálogo de Produtos.
  * Acesse: https://seudominio.com.br/api/test.php
  */
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once __DIR__ . '/db.php';
 
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
+// Proteção de segurança: Exigir autenticação administrativa para execução do diagnóstico
+requireAdminAuth();
+
+error_reporting(0);
+ini_set('display_errors', 0);
 
 $dbHost = getenv('DB_HOST') ?: 'localhost';
 $dbName = getenv('DB_NAME') ?: 'rod38226_hotchili_db';
